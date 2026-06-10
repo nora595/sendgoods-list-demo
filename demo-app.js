@@ -1,6 +1,6 @@
 /* 发运单列表 Demo — 对齐现网 BFF/PaaS 逻辑（所见即所得） */
 /** 每次发布 demo 时更新此时间，用于顶部提示条 */
-const DEMO_UPDATED_AT = "2026-06-10 11:32:23";
+const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
 
 (function () {
   const STATUS_CODE = {
@@ -2900,35 +2900,59 @@ const DEMO_UPDATED_AT = "2026-06-10 11:32:23";
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   }
 
-  /** 展示 demo 最新更新时间（优先 DEMO_UPDATED_AT） */
-  function initDemoUpdateBanner() {
+  const GITHUB_REPO = "nora595/sendgoods-list-demo";
+
+  /** 在线版取 GitHub 最新提交时间，本地取 DEMO_UPDATED_AT */
+  async function initDemoUpdateBanner() {
     const timeEl = document.getElementById("demoUpdateTime");
     if (!timeEl) return;
 
+    const applyTime = value => {
+      timeEl.textContent = value instanceof Date ? formatDateTime(value) : String(value);
+    };
+
+    if (/\.github\.io$/i.test(location.hostname)) {
+      try {
+        const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/commits?per_page=1`, {
+          headers: { Accept: "application/vnd.github+json" }
+        });
+        if (res.ok) {
+          const commits = await res.json();
+          const iso = commits[0]?.commit?.committer?.date;
+          if (iso) {
+            applyTime(new Date(iso));
+            return;
+          }
+        }
+      } catch (_) {}
+    }
+
+    const builtIn = typeof DEMO_UPDATED_AT === "string" ? DEMO_UPDATED_AT.trim() : "";
+    if (builtIn) {
+      applyTime(builtIn);
+      return;
+    }
+
     const meta = document.querySelector('meta[name="demo-updated-at"]');
     const metaTime = meta && meta.getAttribute("content");
-    const builtIn = typeof DEMO_UPDATED_AT === "string" ? DEMO_UPDATED_AT.trim() : "";
-
-    if (builtIn) {
-      timeEl.textContent = builtIn;
-      return;
-    }
     if (metaTime) {
-      timeEl.textContent = metaTime.trim();
+      applyTime(metaTime.trim());
       return;
     }
+
     if (document.lastModified) {
       const fallback = new Date(document.lastModified);
       if (!Number.isNaN(fallback.getTime())) {
-        timeEl.textContent = formatDateTime(fallback);
+        applyTime(fallback);
         return;
       }
     }
+
     timeEl.textContent = "—";
   }
 
+  initDemoUpdateBanner();
   initData();
   bindMainTabEvents();
   refreshList();
-  initDemoUpdateBanner();
 })();
