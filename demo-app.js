@@ -1,4 +1,7 @@
 /* 发运单列表 Demo — 对齐现网 BFF/PaaS 逻辑（所见即所得） */
+/** 每次发布 demo 时更新此时间，用于顶部提示条 */
+const DEMO_UPDATED_AT = "2026-06-10 11:32:23";
+
 (function () {
   const STATUS_CODE = {
     1: "草稿",
@@ -2892,7 +2895,40 @@
     });
   });
 
+  function formatDateTime(date) {
+    const pad = n => String(n).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  }
+
+  /** 展示 demo 最新更新时间（优先 DEMO_UPDATED_AT） */
+  function initDemoUpdateBanner() {
+    const timeEl = document.getElementById("demoUpdateTime");
+    if (!timeEl) return;
+
+    const meta = document.querySelector('meta[name="demo-updated-at"]');
+    const metaTime = meta && meta.getAttribute("content");
+    const builtIn = typeof DEMO_UPDATED_AT === "string" ? DEMO_UPDATED_AT.trim() : "";
+
+    if (builtIn) {
+      timeEl.textContent = builtIn;
+      return;
+    }
+    if (metaTime) {
+      timeEl.textContent = metaTime.trim();
+      return;
+    }
+    if (document.lastModified) {
+      const fallback = new Date(document.lastModified);
+      if (!Number.isNaN(fallback.getTime())) {
+        timeEl.textContent = formatDateTime(fallback);
+        return;
+      }
+    }
+    timeEl.textContent = "—";
+  }
+
   initData();
   bindMainTabEvents();
   refreshList();
+  initDemoUpdateBanner();
 })();

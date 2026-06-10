@@ -1,7 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="demo-updated-at" content="2026-06-10 11:32:23">
   <title>发运单列表 Demo</title>
   <style>
     :root {
@@ -99,6 +100,22 @@
       align-items: flex-end;
       gap: 2px;
       border-bottom: 1px solid var(--line);
+    }
+
+    .demo-update-banner {
+      margin: 10px 0 0;
+      padding: 8px 14px;
+      color: #1677ff;
+      background: #e6f4ff;
+      border: 1px solid #bae0ff;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 20px;
+    }
+
+    .demo-update-banner strong {
+      color: #0958d9;
+      font-weight: 600;
     }
 
     .tab {
@@ -1638,16 +1655,16 @@
     .dispatch-basic-strip {
       display: grid;
       grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 24px 34px;
-      padding: 18px 58px 20px;
+      gap: 10px 20px;
+      padding: 12px 20px 14px;
       color: #606975;
-      font-size: 16px;
-      line-height: 24px;
+      font-size: 12px;
+      line-height: 18px;
     }
 
     .dispatch-basic-strip span {
       display: grid;
-      grid-template-columns: 96px minmax(0, 1fr);
+      grid-template-columns: 88px minmax(0, 1fr);
       align-items: center;
       min-width: 0;
     }
@@ -2949,6 +2966,10 @@
     <main class="content">
       <div class="tabs" id="mainTabs">
         <div class="tab active" data-page="shipment"><span>发运单列表</span><span>×</span></div>
+      </div>
+
+      <div class="demo-update-banner" id="demoUpdateBanner">
+        <strong>提示：</strong>当前版本 demo 已更新，请刷新（Ctrl+F5）查看；刷新时间：<span id="demoUpdateTime">加载中…</span>
       </div>
 
       <div class="page-view" id="shipmentListView">
