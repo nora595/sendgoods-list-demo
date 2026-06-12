@@ -1636,8 +1636,113 @@
 
     .cabinet-edit-form {
       display: grid;
-      gap: 14px;
-      padding: 8px 0;
+      gap: 16px;
+      padding: 4px 0 8px;
+    }
+
+    .cabinet-edit-row {
+      display: grid;
+      grid-template-columns: 120px minmax(0, 1fr);
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cabinet-edit-row label {
+      color: #606266;
+      font-size: 14px;
+      line-height: 20px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .cabinet-edit-row .cabinet-input {
+      height: 36px;
+      font-size: 14px;
+    }
+
+    .cabinet-vehicle-info {
+      color: #606266;
+      font-size: 12px;
+      line-height: 20px;
+      white-space: nowrap;
+    }
+
+    .cabinet-edit-mask {
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    .cabinet-edit-mask.open {
+      display: flex;
+    }
+
+    .cabinet-edit-mask .dialog-cabinet-edit {
+      width: 560px;
+      max-width: 92vw;
+      background: #fff;
+      border-radius: 4px;
+      box-shadow: 0 12px 34px rgba(15, 23, 42, 0.18);
+    }
+
+    .dialog-cabinet-edit .dialog-header {
+      position: relative;
+      justify-content: center;
+      padding: 18px 48px 16px;
+      border-bottom: 0;
+    }
+
+    .dialog-cabinet-edit .dialog-header strong {
+      color: #303133;
+      font-size: 16px;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .dialog-cabinet-edit .dialog-header .btn-default {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 30px;
+      min-width: 30px;
+      height: 30px;
+      padding: 0;
+      color: #909399;
+      border: 0;
+      background: transparent;
+      font-size: 0;
+    }
+
+    .dialog-cabinet-edit .dialog-header .btn-default::before {
+      content: "×";
+      font-size: 20px;
+      line-height: 30px;
+    }
+
+    .dialog-cabinet-edit .dialog-body {
+      padding: 8px 32px 4px;
+      max-height: none;
+      overflow: visible;
+    }
+
+    .dialog-cabinet-edit .dialog-footer {
+      justify-content: center;
+      gap: 12px;
+      padding: 18px 24px 24px;
+      border-top: 0;
+    }
+
+    .dialog-cabinet-edit .btn-default,
+    .dialog-cabinet-edit .btn-action {
+      min-width: 88px;
+      height: 36px;
+      font-size: 14px;
     }
 
     .dialog-dispatch .btn-default,

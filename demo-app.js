@@ -1,6 +1,6 @@
 /* 发运单列表 Demo — 对齐现网 BFF/PaaS 逻辑（所见即所得） */
 /** 每次发布 demo 时更新此时间，用于顶部提示条 */
-const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
+const DEMO_UPDATED_AT = "2026-06-11 10:00:00";
 
 (function () {
   const STATUS_CODE = {
@@ -70,8 +70,7 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
     { showName: "贸易方式", dataName: "contractPumode" },
     { showName: "商品数量", dataName: "camountRes" },
     { showName: "包件数量", dataName: "goodsAhnumRes" },
-    { showName: "报关单", dataName: "contractInvcode" },
-    { showName: "装箱单", dataName: "packageFare" }
+    { showName: "报关单", dataName: "contractInvcode" }
   ];
 
   /** 来自 GoodsExcel.covertSendGoodsDetailAllExcelParam() — exportSendGoods.json */
@@ -214,8 +213,6 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
     { key: "planCabinetDate", label: "计划装柜日期" },
     { key: "actualCabinetDate", label: "实际装柜日期" },
     { key: "tradeMode", label: "贸易方式" },
-    { key: "productQuantity", label: "商品数量" },
-    { key: "packageQuantity", label: "包件数量" },
     { key: "loadingPort", label: "装货港" },
     { key: "declareStatus", label: "申请报关状态" },
     { key: "customsNo", label: "报关单号" },
@@ -695,8 +692,6 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
       planCabinetDate: row.gmtUse || "-",
       actualCabinetDate: row.gmtVaild || "-",
       tradeMode: tradeLabel(row.contractPumode),
-      productQuantity: row.planSum,
-      packageQuantity: row.actualSum,
       loadingPort: row.pricesetCurrencyPort || "-",
       declareStatus: declareLabel(row.applyCustomsStatus),
       customsNo: row.contractInvcode || "-",
@@ -772,7 +767,7 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
     document.getElementById("dialogTitle").textContent = title;
     document.getElementById("dialogBody").innerHTML = bodyHtml;
     document.getElementById("dialogFooter").innerHTML = footerHtml || `<button class="btn-default" onclick="closeDialog()">关闭</button>`;
-    document.getElementById("dialogPanel").classList.remove("dialog-wide", "dialog-xl", "dialog-dispatch", "dialog-price", "dialog-confirm-edit", "dialog-credit", "dialog-log", "dialog-cabinet", "dialog-bl", "dialog-pack");
+    document.getElementById("dialogPanel").classList.remove("dialog-wide", "dialog-xl", "dialog-dispatch", "dialog-price", "dialog-confirm-edit", "dialog-credit", "dialog-log", "dialog-cabinet", "dialog-cabinet-edit", "dialog-bl", "dialog-pack");
     if (sizeClass) {
       String(sizeClass).split(/\s+/).filter(Boolean).forEach(cls => {
         document.getElementById("dialogPanel").classList.add(cls);
@@ -2259,7 +2254,11 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
         weight: calcCabinetWeight(cab.goods),
         bookingNo: row.bookingNo || "",
         packageBillno: cab.goods[0]?.packageBillno || row.packageBillno || "",
-        expressCode: cab.goods[0]?.expressCode || row.expressCode || ""
+        expressCode: cab.goods[0]?.expressCode || row.expressCode || "",
+        vehicleNo: cab.goods[0]?.vehicleNo || row.vehicleNo || "",
+        driverName: row.driverName || "",
+        driverPhone: row.driverPhone || "",
+        driverIdNo: row.driverIdNo || ""
       };
     });
     if (!row.cabinetList.length) {
@@ -2272,7 +2271,11 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
         weight: goods.length ? calcCabinetWeight(goods) : 0,
         bookingNo: row.bookingNo || "",
         packageBillno: row.packageBillno || "",
-        expressCode: row.expressCode || ""
+        expressCode: row.expressCode || "",
+        vehicleNo: row.vehicleNo || "",
+        driverName: row.driverName || "",
+        driverPhone: row.driverPhone || "",
+        driverIdNo: row.driverIdNo || ""
       }];
     }
     return row.cabinetList;
@@ -2308,6 +2311,33 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
     return `<input class="cabinet-input" id="${id}" type="text" value="${safeVal}" placeholder="${safePh}" />`;
   }
 
+  function cabinetEditRow(label, id, value, placeholder) {
+    return `<div class="cabinet-edit-row">
+      <label for="${id}">${label}</label>
+      ${cabinetInput(id, value, placeholder || label)}
+    </div>`;
+  }
+
+  function renderCabinetVehicleInfo(cab) {
+    return `<div class="cabinet-vehicle-info">
+      <div>车牌号：${escapeHtml(cab.vehicleNo || "")}</div>
+      <div>司机姓名：${escapeHtml(cab.driverName || "")}</div>
+      <div>司机手机号：${escapeHtml(cab.driverPhone || "")}</div>
+      <div>司机身份证号码：${escapeHtml(cab.driverIdNo || "")}</div>
+    </div>`;
+  }
+
+  function closeCabinetEditOverlay() {
+    document.getElementById("cabinetEditOverlay")?.remove();
+  }
+
+  function refreshCabinetSupplementTable(row) {
+    const wrap = document.querySelector(".cabinet-supplement-table-wrap");
+    if (!wrap) return;
+    wrap.outerHTML = renderCabinetSupplementTable(row);
+    bindCabinetSupplementEvents(row);
+  }
+
   function renderCabinetSupplementTable(row) {
     const cabinets = ensureCabinetList(row);
     const totals = calcCabinetListTotals(cabinets);
@@ -2324,6 +2354,7 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
         <td>${escapeHtml(cab.bookingNo || "")}</td>
         <td>${escapeHtml(cab.packageBillno || "")}</td>
         <td>${escapeHtml(cab.expressCode || "")}</td>
+        <td>${renderCabinetVehicleInfo(cab)}</td>
         <td><button type="button" class="cabinet-edit-link" data-cabinet-edit="${index}" data-cabinet-code="${code}">修改柜数据</button></td>
       </tr>`).join("");
     return `
@@ -2341,6 +2372,7 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
               <th>订舱号</th>
               <th>实际柜号</th>
               <th>封条号</th>
+              <th>车辆信息</th>
               <th>操作</th>
             </tr>
           </thead>
@@ -2353,7 +2385,7 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
               <td>${totals.qty}</td>
               <td>${totals.pkg}</td>
               <td>${num(totals.weight, 2)}</td>
-              <td colspan="4"></td>
+              <td colspan="5"></td>
             </tr>
           </tfoot>
         </table>
@@ -2425,28 +2457,58 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
     const cabinets = ensureCabinetList(row);
     const cab = cabinets[index];
     if (!cab) return;
-    cabinetDialogCtx = { sendgoodsCode, mode: "edit" };
-    openDialog(
-      "修改柜数据",
-      `<div class="cabinet-edit-form">
-        ${cabinetField("虚拟柜号", cabinetReadonly(cab.virtualNo))}
-        ${cabinetField("订舱号", cabinetInput("cabEditBooking", cab.bookingNo, "请输入订舱号"))}
-        ${cabinetField("实际柜号", cabinetInput("cabEditBillno", cab.packageBillno, "请输入实际柜号"))}
-        ${cabinetField("封条号", cabinetInput("cabEditSeal", cab.expressCode, "请输入封条号"))}
-      </div>`,
-      `<button class="btn-default" type="button" id="cabEditCancel">取消</button>
-       <button class="btn-action" type="button" id="cabEditSave">确认</button>`,
-      "dialog-credit"
-    );
-    document.getElementById("cabEditCancel").onclick = () => openCabinetDialog(row);
+    cabinetDialogCtx = { sendgoodsCode, mode: "edit", cabinetIndex: index };
+    closeCabinetEditOverlay();
+
+    const overlay = document.createElement("div");
+    overlay.id = "cabinetEditOverlay";
+    overlay.className = "cabinet-edit-mask open";
+    overlay.innerHTML = `
+      <div class="dialog dialog-cabinet-edit" role="dialog" aria-modal="true">
+        <div class="dialog-header">
+          <strong>修改柜数据</strong>
+          <button class="btn-default" type="button" id="cabEditClose">关闭</button>
+        </div>
+        <div class="dialog-body">
+          <div class="cabinet-edit-form">
+            ${cabinetEditRow("订舱号", "cabEditBooking", cab.bookingNo, "订舱号")}
+            ${cabinetEditRow("实际柜号", "cabEditBillno", cab.packageBillno, "实际柜号")}
+            ${cabinetEditRow("封条号", "cabEditSeal", cab.expressCode, "封条号")}
+            ${cabinetEditRow("车牌号", "cabEditVehicle", cab.vehicleNo, "车牌号")}
+            ${cabinetEditRow("司机姓名", "cabEditDriverName", cab.driverName, "司机姓名")}
+            ${cabinetEditRow("司机手机号", "cabEditDriverPhone", cab.driverPhone, "司机手机号")}
+            ${cabinetEditRow("司机身份证号码", "cabEditDriverId", cab.driverIdNo, "司机身份证号码")}
+          </div>
+        </div>
+        <div class="dialog-footer">
+          <button class="btn-default" type="button" id="cabEditCancel">取消</button>
+          <button class="btn-action" type="button" id="cabEditSave">确定</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener("click", event => {
+      if (event.target === overlay) closeCabinetEditOverlay();
+    });
+
+    document.getElementById("cabEditClose").onclick = closeCabinetEditOverlay;
+    document.getElementById("cabEditCancel").onclick = closeCabinetEditOverlay;
     document.getElementById("cabEditSave").onclick = () => {
       cab.bookingNo = document.getElementById("cabEditBooking").value.trim();
       cab.packageBillno = document.getElementById("cabEditBillno").value.trim();
       cab.expressCode = document.getElementById("cabEditSeal").value.trim();
+      cab.vehicleNo = document.getElementById("cabEditVehicle").value.trim();
+      cab.driverName = document.getElementById("cabEditDriverName").value.trim();
+      cab.driverPhone = document.getElementById("cabEditDriverPhone").value.trim();
+      cab.driverIdNo = document.getElementById("cabEditDriverId").value.trim();
       row.bookingNo = cab.bookingNo;
       row.packageBillno = cab.packageBillno;
       row.expressCode = cab.expressCode;
-      openCabinetDialog(row);
+      row.vehicleNo = cab.vehicleNo;
+      row.driverName = cab.driverName;
+      row.driverPhone = cab.driverPhone;
+      row.driverIdNo = cab.driverIdNo;
+      closeCabinetEditOverlay();
+      refreshCabinetSupplementTable(row);
       showToast("柜数据已更新");
     };
   }
@@ -2738,11 +2800,15 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
     });
     html += "</table></body></html>";
     const blob = new Blob(["\uFEFF" + html], { type: "application/vnd.ms-excel;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
+    link.href = url;
     link.download = fileName;
+    link.style.display = "none";
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(link.href);
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
   window.exportPackageExcel = function (sendgoodsCode) {
@@ -2758,25 +2824,31 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
   };
 
   window.handleExport = function (type) {
-    document.getElementById("exportDropdown").classList.remove("open");
-    const cfg = EXPORT_CONFIG[type];
-    const source = currentList.length ? currentList : getFilteredList();
-    if (!source.length) return showToast("暂无可导出数据");
+    try {
+      document.getElementById("exportDropdown")?.classList.remove("open");
+      const cfg = EXPORT_CONFIG[type];
+      if (!cfg) return showToast("未知导出类型");
+      const source = currentList.length ? currentList : getFilteredList();
+      if (!source.length) return showToast("暂无可导出数据");
 
-    let rows = [];
-    if (type === "list") {
-      rows = source.map(mapListExportRow);
-    } else if (type === "detail") {
-      source.forEach(r => { rows = rows.concat(mapDetailExportRows(r)); });
-    } else if (type === "rebate") {
-      source.forEach(r => { rows = rows.concat(mapRebateExportRows(r)); });
-    } else if (type === "batch") {
-      source.forEach(r => { rows = rows.concat(mapBatchExportRows(r)); });
+      let rows = [];
+      if (type === "list") {
+        rows = source.map(mapListExportRow);
+      } else if (type === "detail") {
+        source.forEach(r => { rows = rows.concat(mapDetailExportRows(r)); });
+      } else if (type === "rebate") {
+        source.forEach(r => { rows = rows.concat(mapRebateExportRows(r)); });
+      } else if (type === "batch") {
+        source.forEach(r => { rows = rows.concat(mapBatchExportRows(r)); });
+      }
+
+      if (!rows.length) return showToast("暂无可导出数据");
+      downloadExcel(cfg.fileName, cfg.columns, rows);
+      showToast(`已导出 ${rows.length} 行（${cfg.api} / ${cfg.template}）`);
+    } catch (err) {
+      console.error(err);
+      showToast("导出失败，请刷新后重试");
     }
-
-    if (!rows.length) return showToast("暂无可导出数据");
-    downloadExcel(cfg.fileName, cfg.columns, rows);
-    showToast(`已导出 ${rows.length} 行（${cfg.api} / ${cfg.template}）`);
   };
 
   window.applyFilters = function () {
@@ -2873,7 +2945,7 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
 
   document.addEventListener("click", event => {
     if (!event.target.closest("#exportDropdown")) {
-      document.getElementById("exportDropdown").classList.remove("open");
+      document.getElementById("exportDropdown")?.classList.remove("open");
     }
     if (!event.target.closest("#confirmBatchDropdown")) {
       document.getElementById("confirmBatchDropdown")?.classList.remove("open");
@@ -2895,7 +2967,7 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
     });
   });
 
-  function formatDateTime(date) {
+  function formatBannerDateTime(date) {
     const pad = n => String(n).padStart(2, "0");
     return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   }
@@ -2908,7 +2980,7 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
     if (!timeEl) return;
 
     const applyTime = value => {
-      timeEl.textContent = value instanceof Date ? formatDateTime(value) : String(value);
+      timeEl.textContent = value instanceof Date ? formatBannerDateTime(value) : String(value);
     };
 
     if (/\.github\.io$/i.test(location.hostname)) {
@@ -2951,8 +3023,20 @@ const DEMO_UPDATED_AT = "2026-06-10 11:51:20";
     timeEl.textContent = "—";
   }
 
+  document.getElementById("exportDropdown")?.addEventListener("click", event => {
+    const item = event.target.closest("[data-export-type]");
+    if (!item) return;
+    event.stopPropagation();
+    handleExport(item.dataset.exportType);
+  });
+
   initDemoUpdateBanner();
-  initData();
-  bindMainTabEvents();
-  refreshList();
+  try {
+    initData();
+    bindMainTabEvents();
+    refreshList();
+  } catch (err) {
+    console.error(err);
+    showToast("页面初始化异常，请刷新后重试");
+  }
 })();
