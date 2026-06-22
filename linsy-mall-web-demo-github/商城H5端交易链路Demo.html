@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <title>LINSY - Product Details (H5 Demo)</title>
+  <style>
+    :root {
+      --primary: #2cd9c6;
+      --primary-dark: #1fb8a8;
+      --primary-soft: rgba(44, 217, 198, 0.12);
+      --text: #2b3136;
+      --muted: #8a959c;
+      --line: #e8edef;
+      --bg: #f5f7f8;
+      --card: #fff;
+      --tag-bg: #fff0de;
+      --tag-text: #d7892c;
+      --danger: #e05c6a;
+      --disco: #e05c6a;
+      --total-red: #d64545;
+      --shadow: 0 8px 24px rgba(20, 45, 58, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input { font: inherit; }
+
+    .phone {
+      max-width: 430px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--card);
+      position: relative;
+      padding-bottom: calc(68px + env(safe-area-inset-bottom));
+    }
+
+    /* Status bar */
+    .status-bar {
+      height: 44px;
+      padding: 10px 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 15px;
+      font-weight: 600;
+      background: #fff;
+    }
+    .status-icons { display: flex; gap: 5px; font-size: 12px; color: var(--text); }
+
+    /* Nav */
+    .nav-bar {
+      height: 48px;
+      display: grid;
+      grid-template-columns: 40px 1fr 72px;
+      align-items: center;
+      padding: 0 8px;
+      border-bottom: 1px solid var(--line);
+      background: #fff;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .nav-btn {
+      width: 36px; height: 36px;
+      border: none; background: transparent;
+      font-size: 20px; color: #4a5560;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .nav-title { text-align: center; font-size: 16px; font-weight: 600; }
+    .nav-right { display: flex; justify-content: flex-end; gap: 2px; }
+    .nav-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(0,0,0,0.06); border-radius: 20px;
+      padding: 4px 10px; font-size: 14px;
+    }
+
+    /* Gallery */
+    .gallery-wrap { background: #fff; }
+    .gallery-main {
+      width: 100%; aspect-ratio: 1 / 0.82;
+      background: #eef1f3; overflow: hidden;
+    }
+    .gallery-main img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb-strip {
+      display: flex; gap: 8px; padding: 10px 14px 14px;
+      overflow-x: auto; scrollbar-width: none;
+    }
+    .thumb-strip::-webkit-scrollbar { display: none; }
+    .thumb {
+      flex: 0 0 auto; width: 56px; height: 56px;
+      border-radius: 8px; overflow: hidden;
+      border: 2px solid transparent; padding: 0;
+      background: #eef1f3; cursor: pointer;
+    }
+    .thumb.active { border-color: var(--primary); }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* Product info */
+    .info-block { padding: 0 16px 16px; background: #fff; }
+    .product-title {
+      font-size: 22px; font-weight: 700; line-height: 1.25;
+      margin-bottom: 8px; letter-spacing: -0.01em;
+    }
+    .meta-row {
+      font-size: 12px; color: var(--muted);
+      margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    }
+    .badge {
+      display: inline-flex; align-items: center;
+      height: 22px; padding: 0 8px; border-radius: 4px;
+      background: var(--tag-bg); color: var(--tag-text);
+      font-size: 11px; font-weight: 600; margin-bottom: 10px;
+    }
+    .price-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 14px;
+    }
+    .price-main { font-size: 28px; font-weight: 700; flex-shrink: 0; }
+    .price-main .dec { font-size: 16px; }
+    .price-meta {
+      font-size: 12px; color: var(--muted);
+      text-align: right; flex: 1; line-height: 1.4;
+    }
+
+    /* Spec rows */
+    .spec-list { border-top: 1px solid var(--line); padding-top: 4px; }
+    .spec-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 11px 0; border-bottom: 1px solid var(--line);
+      font-size: 13px; color: #4a5560;
+    }
+    .spec-item:last-child { border-bottom: none; }
+    .spec-icon {
+      width: 18px; height: 18px; flex-shrink: 0;
+      color: var(--muted); margin-top: 1px;
+    }
+    .spec-item strong { color: var(--text); font-weight: 500; }
+    .attr-grid-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 14px 0; cursor: pointer;
+      border-top: 1px solid var(--line); margin-top: 4px;
+    }
+    .attr-col { flex: 1; min-width: 0; text-align: center; }
+    .attr-val {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .attr-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #eef1f3; border: 1px solid #dfe6ea; flex-shrink: 0;
+    }
+    .attr-lbl { font-size: 11px; color: var(--muted); }
+    .attr-grid-row .chev { color: var(--muted); font-size: 18px; flex-shrink: 0; padding-left: 4px; }
+
+    /* Tabs */
+    .tabs-wrap {
+      background: #fff; margin-top: 8px;
+      border-top: 8px solid var(--bg);
+    }
+    .tabs {
+      display: flex; gap: 0; overflow-x: auto;
+      padding: 0 16px; border-bottom: 1px solid var(--line);
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex: 0 0 auto; border: none; background: transparent;
+      padding: 14px 12px 12px; font-size: 14px; color: var(--muted);
+      border-bottom: 2px solid transparent; cursor: pointer;
+      white-space: nowrap;
+    }
+    .tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--primary); }
+
+    .tab-panel { padding: 16px; background: #fff; font-size: 13px; line-height: 1.7; color: #56646d; }
+    .tab-panel h4 { font-size: 14px; color: var(--text); margin: 16px 0 8px; }
+    .tab-panel h4:first-child { margin-top: 0; }
+    .tab-panel ul { padding-left: 18px; }
+    .tab-panel li { margin-bottom: 6px; }
+    .story-img { width: 100%; border-radius: 12px; margin-top: 14px; display: block; }
+
+    .story-carousel {
+      position: relative; margin-top: 14px; border-radius: 12px; overflow: hidden;
+      background: #eef1f3; aspect-ratio: 16 / 10;
+    }
+    .story-carousel img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
+    }
+    .carousel-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 32px; height: 32px; border: none; border-radius: 50%;
+      background: rgba(255,255,255,0.88); color: #4a5560;
+      font-size: 20px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .carousel-nav.prev { left: 10px; }
+    .carousel-nav.next { right: 10px; }
+    .carousel-dots {
+      position: absolute; bottom: 10px; left: 0; right: 0;
+      display: flex; justify-content: center; gap: 6px;
+    }
+    .carousel-dot {
+      width: 6px; height: 6px; border-radius: 50%; border: none;
+      background: rgba(255,255,255,0.55); padding: 0; cursor: pointer;
+    }
+    .carousel-dot.on { background: #fff; width: 8px; height: 8px; }
+
+    /* Recommend product cards */
+    .rec-section { margin-top: 20px; }
+    .rec-tabs {
+      display: flex; gap: 0; margin-bottom: 14px;
+      border-bottom: 1px solid var(--line);
+    }
+    .rec-tab {
+      flex: 1; border: none; background: transparent;
+      padding: 10px 0; font-size: 14px; color: var(--muted); cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .rec-tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--primary); }
+    .rec-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px;
+    }
+    .rec-card { cursor: pointer; }
+    .rec-img-wrap {
+      position: relative; border-radius: 10px; overflow: hidden;
+      background: #eef1f3; aspect-ratio: 1/1; margin-bottom: 8px;
+    }
+    .rec-img-wrap > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .rec-thumbs-overlay {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      display: flex; gap: 4px; padding: 8px;
+      background: linear-gradient(to top, rgba(0,0,0,0.28), transparent);
+    }
+    .rec-thumbs-overlay span {
+      width: 30px; height: 30px; border-radius: 4px;
+      overflow: hidden; flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.75);
+      background: #eef1f3;
+    }
+    .rec-thumbs-overlay img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .rec-more {
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.9); font-size: 10px;
+      font-weight: 600; color: var(--text);
+    }
+    .rec-title-row {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 6px; margin-bottom: 6px;
+    }
+    .rec-name {
+      flex: 1; font-size: 12px; line-height: 1.35;
+      overflow: hidden; text-overflow: ellipsis;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      color: var(--text); min-width: 0;
+    }
+    .rec-fav {
+      border: none; background: transparent; padding: 0;
+      font-size: 18px; line-height: 1; color: #56646d;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .rec-fav.on { color: var(--danger); }
+    .rec-price { font-size: 16px; font-weight: 700; line-height: 1.2; margin-bottom: 2px; }
+    .rec-price .dec { font-size: 12px; font-weight: 700; }
+    .rec-item {
+      font-size: 11px; color: var(--muted); margin-bottom: 4px;
+    }
+    .rec-shipping {
+      font-size: 11px; color: var(--muted); line-height: 1.5;
+      display: flex; flex-wrap: wrap; gap: 2px 10px;
+    }
+
+    /* Bottom bar */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 430px;
+      background: #fff;
+      border-top: 1px solid var(--line);
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      display: flex; align-items: center; z-index: 30;
+    }
+    .bar-icon {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      border: none; background: transparent; cursor: pointer; color: #78848d;
+      font-size: 10px;
+    }
+    .bar-icon .ico { font-size: 22px; color: #56646d; font-weight: 400; }
+    .bar-icon.active .ico { color: var(--danger); font-weight: 700; }
+
+    /* Overlay & Sheet */
+    .overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(14, 23, 28, 0.45);
+      display: none; align-items: flex-end; justify-content: center;
+    }
+    .overlay.open { display: flex; }
+
+    .sheet {
+      width: 100%; max-width: 430px;
+      background: #fff; border-radius: 16px 16px 0 0;
+      max-height: 88vh; display: flex; flex-direction: column;
+      animation: slideUp 0.28s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
+    }
+
+    .sheet-header {
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px 48px 12px; position: relative;
+      border-bottom: 1px solid var(--line); flex-shrink: 0;
+    }
+    .sheet-header h3 { font-size: 16px; font-weight: 600; }
+    .sheet-close {
+      position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+      width: 32px; height: 32px; border: none; background: transparent;
+      font-size: 22px; color: #78848d; cursor: pointer;
+    }
+
+    .sheet-body { overflow-y: auto; flex: 1; padding: 0 16px 16px; }
+
+    /* Parameter list sheet */
+    .param-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 0; border-bottom: 1px solid var(--line);
+      font-size: 14px;
+    }
+    .param-row .label { color: var(--muted); }
+    .param-row .value { color: var(--text); text-align: right; max-width: 60%; }
+  </style>
+</head>
+<body>
+  <div class="phone" id="app"></div>
+
+  <div class="overlay" id="overlayParam">
+    <div class="sheet" onclick="event.stopPropagation()">
+      <div class="sheet-header">
+        <h3>Parameter</h3>
+        <button class="sheet-close" data-close="param">×</button>
+      </div>
+      <div class="sheet-body" id="paramBody"></div>
+    </div>
+  </div>
+
+  <script>
+  (() => {
+    const IMAGES = [
+      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=960&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=960&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1617806117938-529d34949e8f?w=960&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=960&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=960&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=960&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=960&h=800&fit=crop',
+    ];
+
+    const PRODUCT = {
+      title: 'Purus Wood Color + White Dining Chair',
+      item: 'LS00757-LS022H200757F',
+      status: 'Active',
+      tag: 'Bestsellers',
+      price: 78.56,
+      moq: 5,
+      stock: 1000,
+      installTime: '45 minutes',
+      deliveryDate: '7 days',
+      dim: '1620mm(L)*310mm(W)*310mm(H)',
+      cbm: '0.155m³',
+      gw: '20.3kg',
+      style: 'Nordic Style',
+      series: 'Series OU-A',
+      model: 'OU2R',
+      lifestyleGallery: IMAGES.slice(2, 6),
+      gallery: IMAGES.slice(0, 7),
+      attributes: [
+        ['Brand', 'LINSY'],
+        ['Cat.', 'Sofa Beds'],
+        ['For', 'Living Room'],
+        ['Plug Spec', '--'],
+        ['Coll.', 'Sofa bed collection'],
+        ['Item', 'LSC25SF047688'],
+        ['Electric', 'NO'],
+        ['Volt', '--'],
+        ['Style', 'LINSY'],
+        ['Model', 'G064'],
+        ['Disc.', 'On Sale'],
+        ['Volt. Freq.', '--'],
+        ['Series', 'Nolara'],
+        ['Goods Type', '--'],
+        ['Elec. Type', '--'],
+        ['Output Volt.', '--'],
+      ],
+      description: {
+        overview: 'Plywood, Foam, PU Cotton, 12-Proof Cat Fabric',
+        points: [
+          '12-Layer Cat-Proof Fabric',
+          'Plush Full Body Comfort',
+          'Stable Carbon Steel Frame',
+          '3-Level Recline & Relax',
+          '5-Second Sofa-to-Bed',
+          'Zoned Easy-Wash Design',
+        ],
+      },
+    };
+
+    const RECOMMEND = Array.from({ length: 4 }, (_, i) => ({
+      id: `rec${i}`,
+      title: 'Oxygen Wood Grain Sintered s...',
+      item: `LSC25ZH07589${i + 2}`,
+      price: 78.56 + i * 12,
+      estDel: '7d',
+      moq: 5,
+      img: IMAGES[i % IMAGES.length],
+      thumbs: IMAGES.slice(i, i + 3),
+      moreCount: 12,
+    }));
+
+    const state = {
+      imageIndex: 0,
+      storySlide: 0,
+      tab: 'description',
+      recTab: 'series',
+      recFavs: {},
+      favorited: false,
+      overlay: null,
+    };
+
+    function fmtPrice(v) {
+      const [int, dec] = v.toFixed(2).split('.');
+      return `<span class="dec">$ </span>${int}<span class="dec">.${dec} USD</span>`;
+    }
+
+    function fmtRecPrice(v) {
+      const [int, dec] = v.toFixed(2).split('.');
+      return `<span class="dec">$ </span>${int}<span class="dec">.${dec} USD</span>`;
+    }
+
+    function openOverlay(name) {
+      state.overlay = name;
+      document.getElementById('overlayParam').classList.toggle('open', name === 'param');
+      if (name === 'param') renderParam();
+    }
+
+    function closeOverlay() {
+      state.overlay = null;
+      document.querySelectorAll('.overlay').forEach(el => el.classList.remove('open'));
+    }
+
+    function renderMain() {
+      document.getElementById('app').innerHTML = `
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="status-icons">▮▮▮ WiFi 🔋</span>
+        </div>
+        <header class="nav-bar">
+          <button class="nav-btn">‹</button>
+          <div class="nav-title">Product Details</div>
+          <div class="nav-right">
+            <div class="nav-pill"><span>···</span><span>⊙</span></div>
+          </div>
+        </header>
+
+        <div class="gallery-wrap">
+          <div class="gallery-main">
+            <img src="${PRODUCT.gallery[state.imageIndex]}" alt="${PRODUCT.title}" />
+          </div>
+          <div class="thumb-strip">
+            ${PRODUCT.gallery.map((src, i) => `
+              <button class="thumb ${state.imageIndex === i ? 'active' : ''}" data-thumb="${i}">
+                <img src="${src}" alt="" />
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="info-block">
+          <h1 class="product-title">${PRODUCT.title}</h1>
+          <div class="meta-row">
+            <span>Item : ${PRODUCT.item}</span>
+            <span>|</span>
+            <span>Status: ${PRODUCT.status}</span>
+          </div>
+          <span class="badge">${PRODUCT.tag}</span>
+          <div class="price-row">
+            <div class="price-main">${fmtPrice(PRODUCT.price)}</div>
+            <div class="price-meta">MOQ: ${PRODUCT.moq} pcs | Stock: ${PRODUCT.stock} pcs</div>
+          </div>
+
+          <div class="spec-list">
+            <div class="spec-item">
+              <svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <span>Estimated Installation Time: <strong>${PRODUCT.installTime}</strong></span>
+            </div>
+            <div class="spec-item">
+              <svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              <span>Delivery Date: <strong>${PRODUCT.deliveryDate}</strong></span>
+            </div>
+            <div class="spec-item">
+              <svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              <span>DIM: <strong>${PRODUCT.dim}</strong></span>
+            </div>
+            <div class="spec-item">
+              <svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+              <span>CBM / G.W: <strong>${PRODUCT.cbm} / ${PRODUCT.gw}</strong></span>
+            </div>
+          </div>
+
+          <div class="attr-grid-row" data-open-param>
+            <div class="attr-col">
+              <div class="attr-val"><span class="attr-dot"></span>${PRODUCT.style}</div>
+              <div class="attr-lbl">Style</div>
+            </div>
+            <div class="attr-col">
+              <div class="attr-val">${PRODUCT.series}</div>
+              <div class="attr-lbl">Series</div>
+            </div>
+            <div class="attr-col">
+              <div class="attr-val">${PRODUCT.model}</div>
+              <div class="attr-lbl">Model No.</div>
+            </div>
+            <span class="chev">›</span>
+          </div>
+        </div>
+
+        <div class="tabs-wrap">
+          <div class="tabs">
+            ${['description', 'sizeChart', 'material', 'installation', 'recommend'].map(t => `
+              <button class="tab ${state.tab === t ? 'active' : ''}" data-tab="${t}">
+                ${t === 'sizeChart' ? 'Size Chart' : t.charAt(0).toUpperCase() + t.slice(1)}
+              </button>
+            `).join('')}
+          </div>
+          <div class="tab-panel">${renderTabPanel()}</div>
+        </div>
+
+        <footer class="bottom-bar">
+          <button class="bar-icon ${state.favorited ? 'active' : ''}" id="btnFav">
+            <span class="ico">♡</span>
+            <span>Fav</span>
+          </button>
+        </footer>
+      `;
+      bindMain();
+    }
+
+    function renderStoryCarousel() {
+      const imgs = PRODUCT.lifestyleGallery || PRODUCT.gallery.slice(2, 6);
+      const idx = state.storySlide % imgs.length;
+      return `
+        <div class="story-carousel">
+          <img src="${imgs[idx]}" alt="lifestyle" />
+          <button class="carousel-nav prev" data-story="prev">‹</button>
+          <button class="carousel-nav next" data-story="next">›</button>
+          <div class="carousel-dots">
+            ${imgs.map((_, i) => `<button class="carousel-dot ${idx === i ? 'on' : ''}" data-story-dot="${i}"></button>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRecCard(r) {
+      const favOn = !!state.recFavs[r.id];
+      return `
+        <article class="rec-card">
+          <div class="rec-img-wrap">
+            <img src="${r.img}" alt="" />
+            <div class="rec-thumbs-overlay">
+              ${r.thumbs.map(t => `<span><img src="${t}" alt="" /></span>`).join('')}
+              <span class="rec-more">+${r.moreCount}</span>
+            </div>
+          </div>
+          <div class="rec-title-row">
+            <div class="rec-name">${r.title}</div>
+            <button class="rec-fav ${favOn ? 'on' : ''}" data-rec-fav="${r.id}" aria-label="Favorite">${favOn ? '♥' : '♡'}</button>
+          </div>
+          <div class="rec-price">${fmtRecPrice(r.price)}</div>
+          <div class="rec-item">Item : ${r.item}</div>
+          <div class="rec-shipping">
+            <span>Est. Del: ${r.estDel}</span>
+            <span>MOQ: ${r.moq} pcs</span>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderRecommendGrid() {
+      return `
+        <div class="rec-tabs">
+          <button class="rec-tab ${state.recTab === 'series' ? 'active' : ''}" data-rec="series">Same Series</button>
+          <button class="rec-tab ${state.recTab === 'category' ? 'active' : ''}" data-rec="category">Same Category</button>
+        </div>
+        <div class="rec-grid">
+          ${RECOMMEND.map(r => renderRecCard(r)).join('')}
+        </div>
+      `;
+    }
+
+    function renderTabPanel() {
+      if (state.tab === 'description') {
+        return `
+          <h4>Overview</h4>
+          <p>${PRODUCT.description.overview}</p>
+          <h4>Product Selling Points</h4>
+          <ul>${PRODUCT.description.points.map(p => `<li>${p}</li>`).join('')}</ul>
+          ${renderStoryCarousel()}
+          <div class="rec-section">${renderRecommendGrid()}</div>
+        `;
+      }
+      if (state.tab === 'sizeChart') {
+        return `<h4>Size Chart</h4><p>DIM: ${PRODUCT.dim} · CBM: ${PRODUCT.cbm} · G.W.: ${PRODUCT.gw}</p><img class="story-img" src="${PRODUCT.gallery[2]}" alt="size" />`;
+      }
+      if (state.tab === 'material') {
+        return `<h4>Material</h4><p>${PRODUCT.description.overview}. Structured material info for export compliance.</p><img class="story-img" src="${PRODUCT.gallery[3]}" alt="material" />`;
+      }
+      if (state.tab === 'installation') {
+        return `<h4>Installation</h4><ul><li>Estimated time: ${PRODUCT.installTime}</li><li>Unpack and verify all parts.</li><li>Follow assembly guide included in package.</li></ul>`;
+      }
+      if (state.tab === 'recommend') {
+        return renderRecommendGrid();
+      }
+      return '';
+    }
+
+    function renderParam() {
+      document.getElementById('paramBody').innerHTML = PRODUCT.attributes.map(([label, value]) => `
+        <div class="param-row">
+          <span class="label">${label}</span>
+          <span class="value">${value}</span>
+        </div>
+      `).join('');
+    }
+
+    function bindMain() {
+      document.querySelectorAll('[data-thumb]').forEach(btn => {
+        btn.onclick = () => { state.imageIndex = Number(btn.dataset.thumb); renderMain(); };
+      });
+      document.querySelectorAll('[data-tab]').forEach(btn => {
+        btn.onclick = () => { state.tab = btn.dataset.tab; renderMain(); };
+      });
+      document.querySelectorAll('[data-rec]').forEach(btn => {
+        btn.onclick = () => { state.recTab = btn.dataset.rec; renderMain(); };
+      });
+      document.querySelectorAll('[data-rec-fav]').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.recFav;
+          state.recFavs[id] = !state.recFavs[id];
+          renderMain();
+        };
+      });
+      document.querySelectorAll('[data-story]').forEach(btn => {
+        btn.onclick = () => {
+          const imgs = PRODUCT.lifestyleGallery || PRODUCT.gallery.slice(2, 6);
+          if (btn.dataset.story === 'prev') {
+            state.storySlide = (state.storySlide - 1 + imgs.length) % imgs.length;
+          } else {
+            state.storySlide = (state.storySlide + 1) % imgs.length;
+          }
+          renderMain();
+        };
+      });
+      document.querySelectorAll('[data-story-dot]').forEach(btn => {
+        btn.onclick = () => {
+          state.storySlide = Number(btn.dataset.storyDot);
+          renderMain();
+        };
+      });
+      document.getElementById('btnFav').onclick = () => {
+        state.favorited = !state.favorited;
+        renderMain();
+      };
+      document.querySelector('[data-open-param]').onclick = () => openOverlay('param');
+    }
+
+    document.querySelectorAll('[data-close]').forEach(btn => {
+      btn.onclick = () => closeOverlay();
+    });
+    document.querySelectorAll('.overlay').forEach(overlay => {
+      overlay.onclick = (e) => { if (e.target === overlay) closeOverlay(); };
+    });
+
+    renderMain();
+  })();
+  </script>
+</body>
+</html>
