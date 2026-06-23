@@ -1,3582 +1,616 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="demo-updated-at" content="2026-06-10 11:51:20">
-  <title>发运单列表 Demo</title>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+  <title>LINSY - Product Details (H5 Demo)</title>
   <style>
     :root {
-      --primary: #2f8ee8;
-      --primary-dark: #1f75c9;
-      --bg: #f5f7fb;
-      --card: #ffffff;
-      --line: #e8edf3;
-      --text: #1f2937;
-      --muted: #7b8794;
-      --sidebar: #ffffff;
-      --hover: #f7fbff;
-      --shadow: 0 12px 34px rgba(30, 41, 59, 0.14);
+      --primary: #2cd9c6;
+      --primary-dark: #1fb8a8;
+      --primary-soft: rgba(44, 217, 198, 0.12);
+      --text: #2b3136;
+      --muted: #8a959c;
+      --line: #e8edef;
+      --bg: #f5f7f8;
+      --card: #fff;
+      --tag-bg: #fff0de;
+      --tag-text: #d7892c;
+      --danger: #e05c6a;
+      --disco: #e05c6a;
+      --total-red: #d64545;
+      --shadow: 0 8px 24px rgba(20, 45, 58, 0.08);
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      margin: 0;
-      color: var(--text);
+    html, body {
+      min-height: 100%;
       background: var(--bg);
-      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
-      font-size: 12px;
+      color: var(--text);
+      font-family: "Segoe UI", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
     }
 
-    button,
-    input,
-    select {
-      font: inherit;
-    }
+    button, input { font: inherit; }
 
-    button {
-      height: 32px;
-      border: 1px solid transparent;
-      border-radius: 2px;
-      padding: 0 18px;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: 0.16s ease;
-    }
-
-    .app {
-      display: grid;
-      grid-template-columns: 120px minmax(0, 1fr);
+    .phone {
+      max-width: 430px;
+      margin: 0 auto;
       min-height: 100vh;
-    }
-
-    .sidebar {
-      background: var(--sidebar);
-      border-right: 1px solid var(--line);
-      color: #27364a;
-    }
-
-    .logo {
-      height: 42px;
-      padding-left: 18px;
-      display: flex;
-      align-items: center;
-      font-weight: 700;
-    }
-
-    .menu-title,
-    .menu-item {
-      height: 36px;
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-    }
-
-    .menu-title {
-      color: #111827;
-      font-weight: 700;
-    }
-
-    .menu-item {
-      color: #334155;
-      cursor: pointer;
-    }
-
-    .menu-item.active {
-      color: var(--primary);
-      background: #eef7ff;
-    }
-
-    .content {
-      min-width: 0;
-      padding: 0 12px 18px;
-    }
-
-    .tabs {
-      height: 38px;
-      display: flex;
-      align-items: flex-end;
-      gap: 2px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .demo-update-banner {
-      margin: 10px 0 0;
-      padding: 8px 14px;
-      color: #1677ff;
-      background: #e6f4ff;
-      border: 1px solid #bae0ff;
-      border-radius: 4px;
-      font-size: 12px;
-      line-height: 20px;
-    }
-
-    .demo-update-banner strong {
-      color: #0958d9;
-      font-weight: 600;
-    }
-
-    .tab {
-      min-width: 116px;
-      height: 34px;
-      padding: 0 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      color: var(--primary);
-      background: #fff;
-      border: 1px solid var(--line);
-      border-bottom: 0;
-    }
-
-    .tab span:last-child {
-      color: #a8b3c2;
-      margin-left: 12px;
-    }
-
-    .card {
       background: var(--card);
-      border: 1px solid var(--line);
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
-    }
-
-    .search-card {
-      margin-top: 12px;
-      padding: 14px 16px 16px;
-    }
-
-    .search-title {
-      margin-bottom: 10px;
-      color: #1f2937;
-      font-size: 15px;
-      font-weight: 700;
-    }
-
-    .filter-layout {
-      display: block;
-    }
-
-    .quick-search {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(190px, 1fr));
-      gap: 10px 14px;
-      align-items: end;
-    }
-
-    .filter-field {
-      min-width: 0;
-    }
-
-    .filter-field label {
-      display: block;
-      margin-bottom: 6px;
-      color: #64748b;
-      font-size: 12px;
-    }
-
-    .date-filter {
-      grid-column: 1 / -1;
-    }
-
-    .date-filter-row {
-      display: grid;
-      grid-template-columns: 118px 280px auto;
-      gap: 8px 10px;
-      align-items: center;
-      width: max-content;
-      max-width: 100%;
-    }
-
-    .date-type-select {
-      width: 118px;
-      height: 32px;
-      border: 1px solid var(--line);
-      border-radius: 2px;
-      padding: 0 10px;
-      color: #334155;
-      background: #fff;
-      outline: none;
-    }
-
-    .date-range-box {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      width: 280px;
-    }
-
-    .date-range-box input {
-      flex: 1;
-      min-width: 0;
-      height: 32px;
-      border: 1px solid var(--line);
-      border-radius: 2px;
-      padding: 0 10px;
-      color: #334155;
-      background: #fff;
-      outline: none;
-    }
-
-    .date-separator {
-      color: #94a3b8;
-    }
-
-    .search-actions.inline {
-      display: flex;
-      flex: 0 0 auto;
-      gap: 8px;
-      align-items: center;
-      height: 32px;
-    }
-
-    .field,
-    .number-field {
-      display: flex;
-      align-items: center;
-      min-width: 0;
-    }
-
-    .field select,
-    .field input,
-    .drawer-field select,
-    .drawer-field input {
-      width: 100%;
-      height: 32px;
-      border: 1px solid var(--line);
-      border-radius: 2px;
-      padding: 0 10px;
-      color: #334155;
-      background: #fff;
-      outline: none;
-    }
-
-    .number-field select {
-      width: 110px;
-      border-right: 0;
-      border-radius: 2px 0 0 2px;
-    }
-
-    .number-field input {
-      border-radius: 0 2px 2px 0;
-    }
-
-    .field input:focus,
-    .field select:focus,
-    .drawer-field input:focus,
-    .drawer-field select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(47, 142, 232, 0.12);
-    }
-
-    .btn-primary {
-      color: #fff;
-      background: var(--primary);
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-dark);
-    }
-
-    .btn-default {
-      color: #475569;
-      background: #fff;
-      border-color: var(--line);
-    }
-
-    .btn-default:hover {
-      color: var(--primary);
-      border-color: var(--primary);
-    }
-
-    .btn-action {
-      height: 32px;
-      padding: 0 18px;
-      border-radius: 2px;
-      color: #fff;
-      background: var(--primary);
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .btn-action:hover {
-      background: var(--primary-dark);
-    }
-
-    .btn-reset {
-      color: #475569;
-      background: #fff;
-      border: 1px solid var(--line);
-    }
-
-    .btn-reset:hover {
-      color: var(--primary);
-      border-color: #cfe5fb;
-    }
-
-    .btn-link {
-      height: 32px;
-      padding: 0 12px;
-      color: var(--primary);
-      background: transparent;
-      border: 0;
-      font-size: 13px;
-    }
-
-    .toolbar {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-      gap: 10px;
-      margin: 12px 0 8px;
-    }
-
-    .dropdown {
       position: relative;
-      display: inline-flex;
+      padding-bottom: calc(68px + env(safe-area-inset-bottom));
     }
 
-    .btn-export-trigger {
-      height: 32px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 0 14px 0 18px;
-      border: 0;
-      border-radius: 2px;
-      color: #fff;
-      background: var(--primary);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-export-trigger:hover,
-    .dropdown.open .btn-export-trigger {
-      background: var(--primary-dark);
-    }
-
-    .export-chevron {
-      font-size: 12px;
-      line-height: 1;
-      opacity: 0.95;
-    }
-
-    .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      z-index: 20;
-      min-width: 188px;
-      padding: 6px 0;
-      background: #fff;
-      border: 1px solid #e4e7ed;
-      border-radius: 4px;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .dropdown-menu::before {
-      content: "";
-      position: absolute;
-      top: -5px;
-      right: 28px;
-      width: 8px;
-      height: 8px;
-      background: #fff;
-      border-left: 1px solid #e4e7ed;
-      border-top: 1px solid #e4e7ed;
-      transform: rotate(45deg);
-    }
-
-    .dropdown.open .dropdown-menu {
-      display: block;
-    }
-
-    .export-menu-item {
-      width: 100%;
-      height: 34px;
-      display: flex;
-      align-items: center;
-      padding: 0 16px;
-      border: 0;
-      color: #606266;
-      background: #fff;
-      font-size: 13px;
-      text-align: left;
-      white-space: nowrap;
-      cursor: pointer;
-    }
-
-    .export-menu-item:hover {
-      color: var(--primary);
-      background: #ecf5ff;
-    }
-
-    .customer-type {
-      display: grid;
-      grid-template-columns: 118px 1fr;
-      gap: 0;
-    }
-
-    .customer-type select {
-      border-right: 0;
-      border-radius: 2px 0 0 2px;
-    }
-
-    .customer-type input {
-      border-radius: 0 2px 2px 0;
-    }
-
-    .table-card {
-      overflow: hidden;
-    }
-
-    .table-wrap {
-      overflow: auto;
-      height: calc(100vh - 300px);
-      min-height: 320px;
-      background: #fff;
-    }
-
-    table {
-      width: 100%;
-      min-width: 2400px;
-      border-collapse: collapse;
-    }
-
-    th,
-    td {
-      height: 56px;
-      padding: 8px 12px;
-      border-bottom: 1px solid #edf1f6;
-      text-align: left;
-      white-space: nowrap;
-      vertical-align: middle;
-    }
-
-    th {
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      height: 42px;
-      color: #475569;
-      background: #f8fafc;
-      font-weight: 700;
-    }
-
-    th.col-fixed-right,
-    td.col-fixed-right {
-      position: sticky;
-      right: 0;
-      z-index: 3;
-      min-width: 96px;
-      background: #fff;
-      box-shadow: -6px 0 8px -4px rgba(15, 23, 42, 0.08);
-    }
-
-    th.col-fixed-right {
-      z-index: 4;
-      background: #f8fafc;
-    }
-
-    tbody tr:hover td.col-fixed-right {
-      background: var(--hover);
-    }
-
-    tbody tr:hover {
-      background: var(--hover);
-    }
-
-    .link {
-      color: var(--primary);
-      cursor: pointer;
-      text-decoration: none;
-    }
-
-    .copy {
-      margin-left: 4px;
-      color: #97a6b8;
-      cursor: pointer;
-    }
-
-    .muted {
-      color: var(--muted);
-    }
-
-    .money {
-      line-height: 22px;
-    }
-
-    .money a {
-      color: var(--primary);
-      text-decoration: none;
-    }
-
-    .status {
-      display: inline-flex;
-      align-items: center;
-      min-width: 54px;
-    }
-
-    .action-cell {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 6px;
-      line-height: 16px;
-      min-width: 88px;
-    }
-
-    .action-cell a,
-    .action-cell button.action-link {
-      color: var(--primary);
-      cursor: pointer;
-      text-decoration: none;
-      background: none;
-      border: 0;
-      padding: 0;
-      font-size: 12px;
-    }
-
-    .page-no.disabled {
-      color: #cbd5e1;
-      pointer-events: none;
-    }
-
-    .pagination {
+    /* Status bar */
+    .status-bar {
       height: 44px;
+      padding: 10px 20px 0;
       display: flex;
       align-items: center;
-      justify-content: flex-end;
-      gap: 14px;
-      padding: 0 16px;
-      color: #64748b;
-      background: #fff;
-    }
-
-    .page-no {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 26px;
-      height: 26px;
-      border-radius: 2px;
-      color: #475569;
-    }
-
-    .page-no.active {
-      color: var(--primary);
-      font-weight: 700;
-    }
-
-    .page-input {
-      width: 44px;
-      height: 28px;
-      border: 1px solid var(--line);
-      text-align: center;
-    }
-
-    .mask {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 20;
-      background: rgba(15, 23, 42, 0.55);
-    }
-
-    .mask.open {
-      display: block;
-    }
-
-    .drawer {
-      position: fixed;
-      top: 0;
-      right: 0;
-      z-index: 21;
-      width: 430px;
-      height: 100vh;
-      padding: 20px 20px 72px;
-      background: #fff;
-      transform: translateX(100%);
-      transition: 0.22s ease;
-      box-shadow: var(--shadow);
-    }
-
-    .drawer.open {
-      transform: translateX(0);
-    }
-
-    .drawer-grid {
-      display: grid;
-      gap: 14px;
-    }
-
-    .drawer-field label {
-      display: none;
-    }
-
-    .date-range {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-    }
-
-    .drawer-footer {
-      position: absolute;
-      right: 20px;
-      bottom: 20px;
-      display: flex;
-      gap: 10px;
-    }
-
-    .modal-mask {
-      display: none;
-      position: fixed;
-      inset: 0;
-      z-index: 40;
-      align-items: center;
-      justify-content: center;
-      background: rgba(15, 23, 42, 0.45);
-    }
-
-    .modal-mask.open {
-      display: flex;
-    }
-
-    .dialog {
-      width: 640px;
-      max-width: 92vw;
-      max-height: 82vh;
-      overflow: hidden;
-      background: #fff;
-      border-radius: 4px;
-      box-shadow: var(--shadow);
-    }
-
-    .dialog-wide {
-      width: 820px;
-    }
-
-    .dialog-xl {
-      width: 960px;
-    }
-
-    .dialog-price {
-      width: 380px;
-      max-width: 92vw;
-      overflow: hidden;
-    }
-
-    .dialog-price .dialog-body {
-      padding: 0 0 16px;
-      overflow: hidden;
-      max-height: none;
-    }
-
-    .dialog-price .dialog-footer {
-      display: none;
-    }
-
-    .dialog-price .dialog-header {
-      padding: 16px 16px 12px;
-      border-bottom: 0;
-    }
-
-    .dialog-price .dialog-header strong {
-      color: #303133;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .dialog-price .dialog-header .btn-default {
-      width: 30px;
-      min-width: 30px;
-      height: 30px;
-      padding: 0;
-      color: #909399;
-      border: 0;
-      background: transparent;
-      font-size: 0;
-    }
-
-    .dialog-price .dialog-header .btn-default::before {
-      content: "×";
-      font-size: 20px;
-      line-height: 30px;
-    }
-
-    .dialog-credit {
-      width: 680px;
-      max-width: 92vw;
-    }
-
-    .dialog-credit .dialog-header {
-      padding: 16px 20px 14px;
-      border-bottom: 1px solid #ebeef5;
-    }
-
-    .dialog-credit .dialog-header strong {
-      color: #303133;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .dialog-credit .dialog-header .btn-default {
-      width: 30px;
-      min-width: 30px;
-      height: 30px;
-      padding: 0;
-      color: #909399;
-      border: 0;
-      background: transparent;
-      font-size: 0;
-    }
-
-    .dialog-credit .dialog-header .btn-default::before {
-      content: "×";
-      font-size: 20px;
-      line-height: 30px;
-    }
-
-    .dialog-credit .dialog-body {
-      padding: 20px 24px 8px;
-      max-height: none;
-      overflow: visible;
-    }
-
-    .dialog-credit .dialog-footer {
-      justify-content: center;
-      gap: 12px;
-      padding: 16px 24px 22px;
-      border-top: 0;
-    }
-
-    .credit-form {
-      display: grid;
-      gap: 16px;
-    }
-
-    .credit-form-row {
-      display: grid;
-      grid-template-columns: 120px minmax(0, 1fr);
-      gap: 12px;
-      align-items: start;
-    }
-
-    .credit-form-row > label {
-      padding-top: 8px;
-      color: #606266;
-      font-size: 14px;
-      text-align: right;
-      line-height: 20px;
-    }
-
-    .credit-form-row > label.required::before {
-      content: "*";
-      color: #f56c6c;
-      margin-right: 4px;
-    }
-
-    .credit-readonly {
-      min-height: 36px;
-      display: flex;
-      align-items: center;
-      padding: 0 12px;
-      color: #303133;
-      background: #f5f7fa;
-      border: 1px solid #e4e7ed;
-      border-radius: 4px;
-      font-size: 14px;
-    }
-
-    .credit-upload-block {
-      display: grid;
-      gap: 8px;
-    }
-
-    .credit-upload-btn {
-      width: 88px;
-      height: 32px;
-      color: #fff;
-      background: #409eff;
-      border: 1px solid #409eff;
-      border-radius: 4px;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .credit-upload-hint {
-      color: #909399;
-      font-size: 12px;
-      line-height: 18px;
-    }
-
-    .credit-textarea-wrap {
-      position: relative;
-    }
-
-    .credit-textarea {
-      width: 100%;
-      min-height: 96px;
-      padding: 8px 12px 28px;
-      color: #606266;
-      border: 1px solid #dcdfe6;
-      border-radius: 4px;
-      resize: vertical;
-      font-size: 14px;
-      line-height: 20px;
-      outline: none;
-    }
-
-    .credit-textarea:focus {
-      border-color: #409eff;
-    }
-
-    .credit-textarea-count {
-      position: absolute;
-      right: 10px;
-      bottom: 8px;
-      color: #909399;
-      font-size: 12px;
-      line-height: 1;
-    }
-
-    .dialog-bl {
-      width: 760px;
-      max-width: 92vw;
-    }
-
-    .dialog-bl .dialog-header {
-      padding: 16px 20px 14px;
-      border-bottom: 1px solid #ebeef5;
-    }
-
-    .dialog-bl .dialog-header strong {
-      color: #303133;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .dialog-bl .dialog-header .btn-default {
-      width: 30px;
-      min-width: 30px;
-      height: 30px;
-      padding: 0;
-      color: #909399;
-      border: 0;
-      background: transparent;
-      font-size: 0;
-    }
-
-    .dialog-bl .dialog-header .btn-default::before {
-      content: "×";
-      font-size: 20px;
-      line-height: 30px;
-    }
-
-    .dialog-bl .dialog-body {
-      padding: 20px 24px 12px;
-      max-height: none;
-      overflow: visible;
-    }
-
-    .dialog-bl .dialog-footer {
-      justify-content: center;
-      gap: 12px;
-      padding: 16px 24px 22px;
-      border-top: 0;
-    }
-
-    .bl-form-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px 24px;
-    }
-
-    .bl-form-item label {
-      display: block;
-      margin-bottom: 6px;
-      color: #606266;
-      font-size: 13px;
-      line-height: 18px;
-    }
-
-    .bl-form-item label.required::before {
-      content: "*";
-      color: #f56c6c;
-      margin-right: 4px;
-    }
-
-    .bl-readonly,
-    .bl-input {
-      width: 100%;
-      height: 32px;
-      padding: 0 10px;
-      color: #606266;
-      border: 1px solid #dcdfe6;
-      border-radius: 4px;
-      font-size: 13px;
-      box-sizing: border-box;
-    }
-
-    .bl-readonly {
-      display: flex;
-      align-items: center;
-      background: #f5f7fa;
-      border-color: #e4e7ed;
-    }
-
-    .bl-input:focus {
-      border-color: #409eff;
-      outline: none;
-    }
-
-    .bl-upload-row {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 24px;
-      margin-top: 20px;
-    }
-
-    .bl-upload-item label {
-      display: block;
-      margin-bottom: 8px;
-      color: #606266;
-      font-size: 13px;
-    }
-
-    .bl-upload-item label.required::before {
-      content: "*";
-      color: #f56c6c;
-      margin-right: 4px;
-    }
-
-    .bl-upload-box {
-      width: 80px;
-      height: 80px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #909399;
-      border: 1px dashed #dcdfe6;
-      border-radius: 4px;
-      background: #fafafa;
-      font-size: 28px;
-      line-height: 1;
-      cursor: pointer;
-    }
-
-    .bl-upload-box:hover {
-      border-color: #409eff;
-      color: #409eff;
-    }
-
-    .bl-upload-box.uploaded {
-      color: #409eff;
-      border-color: #409eff;
-      background: #ecf5ff;
-      font-size: 12px;
-    }
-
-    .dialog-pack {
-      width: 520px;
-      max-width: 92vw;
-    }
-
-    .dialog-pack .dialog-header {
-      position: relative;
-      justify-content: center;
-      padding: 16px 20px 14px;
-      border-bottom: 1px solid #ebeef5;
-    }
-
-    .dialog-pack .dialog-header strong {
-      flex: 1;
-      color: #303133;
-      font-size: 16px;
-      font-weight: 700;
-      text-align: center;
-    }
-
-    .dialog-pack .dialog-header .btn-default {
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      width: 30px;
-      min-width: 30px;
-      height: 30px;
-      margin-top: -15px;
-      padding: 0;
-      color: #909399;
-      border: 0;
-      background: transparent;
-      font-size: 0;
-    }
-
-    .dialog-pack .dialog-header .btn-default::before {
-      content: "×";
-      font-size: 20px;
-      line-height: 30px;
-    }
-
-    .dialog-pack .dialog-body {
-      padding: 24px 32px 8px;
-      max-height: none;
-      overflow: visible;
-    }
-
-    .dialog-pack .dialog-footer {
-      justify-content: center;
-      gap: 12px;
-      padding: 16px 24px 22px;
-      border-top: 0;
-    }
-
-    .pack-confirm-form {
-      display: grid;
-      gap: 18px;
-    }
-
-    .pack-confirm-form-row {
-      display: grid;
-      grid-template-columns: 108px minmax(0, 1fr);
-      gap: 12px;
-      align-items: center;
-    }
-
-    .pack-confirm-form-row > label {
-      color: #606266;
-      font-size: 14px;
-      text-align: right;
-      line-height: 20px;
-    }
-
-    .pack-confirm-form-row > label.required::before {
-      content: "*";
-      color: #f56c6c;
-      margin-right: 4px;
-    }
-
-    .pack-input {
-      width: 100%;
-      height: 32px;
-      padding: 0 10px;
-      color: #606266;
-      border: 1px solid #dcdfe6;
-      border-radius: 4px;
-      background: #fff;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-
-    .pack-input:focus {
-      border-color: #409eff;
-      outline: none;
-    }
-
-    .pack-consignee-field {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-height: 32px;
-    }
-
-    .pack-consignee-value {
-      color: #303133;
-      font-size: 14px;
-    }
-
-    .pack-address-link {
-      color: #409eff;
-      background: none;
-      border: 0;
-      padding: 0;
-      font-size: 14px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .pack-address-link:hover {
-      text-decoration: underline;
-    }
-
-    .dialog-log {
-      width: 860px;
-      max-width: 94vw;
-      max-height: 80vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .dialog-log .dialog-header {
-      padding: 16px 20px 14px;
-      border-bottom: 1px solid #ebeef5;
-    }
-
-    .dialog-log .dialog-header strong {
-      color: #303133;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .dialog-log .dialog-header .btn-default {
-      width: 30px;
-      min-width: 30px;
-      height: 30px;
-      padding: 0;
-      color: #909399;
-      border: 0;
-      background: transparent;
-      font-size: 0;
-    }
-
-    .dialog-log .dialog-header .btn-default::before {
-      content: "×";
-      font-size: 20px;
-      line-height: 30px;
-    }
-
-    .dialog-log .dialog-body {
-      flex: 1;
-      min-height: 0;
-      padding: 0;
-      max-height: none;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .dialog-log .dialog-footer {
-      display: none;
-    }
-
-    .log-dialog-wrap {
-      flex: 1;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .log-table-wrap {
-      flex: 1;
-      min-height: 0;
-      overflow-x: hidden;
-      overflow-y: auto;
-    }
-
-    .log-table {
-      width: 100%;
-      min-width: 0;
-      max-width: 100%;
-      table-layout: fixed;
-      border-collapse: collapse;
-      font-size: 13px;
-      line-height: 20px;
-    }
-
-    .log-table th,
-    .log-table td {
-      height: auto;
-      min-height: 40px;
-      white-space: normal;
-    }
-
-    .log-table col.log-col-content {
-      width: 52%;
-    }
-
-    .log-table col.log-col-user {
-      width: 16%;
-    }
-
-    .log-table col.log-col-time {
-      width: 32%;
-    }
-
-    .log-table thead th {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      height: 42px;
-      padding: 10px 12px;
-      color: #303133;
-      font-weight: 700;
-      text-align: left;
-      background: #f5f7fa;
-      border-bottom: 1px solid #ebeef5;
-    }
-
-    .log-table thead th:nth-child(2) {
-      width: 110px;
-    }
-
-    .log-table thead th:nth-child(3) {
-      width: 170px;
-    }
-
-    .log-table thead th:nth-child(2),
-    .log-table thead th:nth-child(3),
-    .log-table tbody td.log-op-user,
-    .log-table tbody td.log-op-time {
-      text-align: center;
-    }
-
-    .log-table tbody td {
-      padding: 10px 12px;
-      color: #606266;
-      border-bottom: 1px solid #ebeef5;
-      vertical-align: top;
-    }
-
-    .log-table tbody td.log-op-content {
-      word-break: break-word;
-      white-space: normal;
-    }
-
-    .log-table tbody td.log-op-user,
-    .log-table tbody td.log-op-time {
-      white-space: nowrap;
-      text-align: center;
-    }
-
-    .log-table tbody tr:last-child td {
-      border-bottom: 0;
-    }
-
-    .log-table .log-empty {
-      padding: 32px 16px;
-      color: #909399;
-      text-align: center;
-    }
-
-    .log-pagination {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      flex-wrap: wrap;
-      gap: 10px 14px;
-      padding: 12px 16px;
-      color: #64748b;
-      font-size: 13px;
-      border-top: 1px solid #ebeef5;
-      background: #fff;
-    }
-
-    .log-page-size {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: #64748b;
-    }
-
-    .log-page-size select {
-      height: 28px;
-      padding: 0 8px;
-      color: #606266;
-      border: 1px solid #dcdfe6;
-      border-radius: 2px;
-      background: #fff;
-      font-size: 13px;
-    }
-
-    .log-pagination .page-no {
-      cursor: pointer;
-    }
-
-    .log-pagination .page-no.disabled {
-      cursor: default;
-    }
-
-    .price-adjust-panel {
-      margin: 0 16px;
-      border: 1px solid #ebeef5;
-      font-size: 14px;
-      line-height: 22px;
-    }
-
-    .price-adjust-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      border-bottom: 1px solid #ebeef5;
-    }
-
-    .price-adjust-row:last-child {
-      border-bottom: 0;
-    }
-
-    .price-adjust-label {
-      padding: 12px 14px;
-      color: #909399;
-      border-right: 1px solid #ebeef5;
-      background: #fff;
-      text-align: left;
-    }
-
-    .price-adjust-value {
-      padding: 12px 14px;
-      color: #303133;
-      background: #fff;
-      text-align: right;
-    }
-
-    .price-adjust-toggle {
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .price-adjust-arrow {
-      display: inline-block;
-      margin-left: 2px;
-      color: #409eff;
-      font-size: 12px;
-      font-weight: 400;
-      vertical-align: middle;
-    }
-
-    .price-adjust-sub .price-adjust-label {
-      text-align: right;
-      padding-right: 12px;
-      color: #909399;
-    }
-
-    .price-adjust-sub.collapsed {
-      display: none;
-    }
-
-    .dialog-dispatch {
-      width: calc(100vw - 96px);
-      max-width: 1860px;
-      max-height: 88vh;
-    }
-
-    .section-title {
-      margin: 14px 0 8px;
-      color: #334155;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .detail-table,
-    .matrix-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-
-    .detail-table th,
-    .detail-table td,
-    .matrix-table th,
-    .matrix-table td {
-      height: auto;
-      padding: 8px 10px;
-      border: 1px solid #edf1f6;
-      white-space: normal;
-      vertical-align: top;
-    }
-
-    .detail-table th,
-    .matrix-table th {
-      position: static;
-      background: #f8fafc;
-      color: #475569;
-      font-weight: 700;
-    }
-
-    .matrix-table {
-      table-layout: fixed;
-    }
-
-    .matrix-table th:nth-child(1),
-    .matrix-table td:nth-child(1) {
-      width: 92px;
-    }
-
-    .matrix-table th:nth-child(2),
-    .matrix-table td:nth-child(2) {
-      width: 92px;
-    }
-
-    .matrix-table th,
-    .matrix-table td {
-      padding: 6px 8px;
-      word-break: break-word;
-    }
-
-    .detail-table-wrap {
-      max-height: 280px;
-      overflow: auto;
-      border: 1px solid #edf1f6;
-      border-radius: 4px;
-    }
-
-    .dispatch-detail-page {
-      min-width: 0;
-      color: #1f2937;
-    }
-
-    .dialog-dispatch .dialog-header {
-      min-height: 54px;
-      padding: 18px 20px 8px;
-      border-bottom: 0;
-    }
-
-    .dialog-dispatch .dialog-header strong {
-      color: #111827;
-      font-size: 18px;
-      font-weight: 700;
-    }
-
-    .dialog-dispatch .dialog-header .btn-default {
-      width: 30px;
-      min-width: 30px;
-      height: 30px;
-      padding: 0;
-      color: #111827;
-      border: 0;
-      background: transparent;
-      font-size: 0;
-    }
-
-    .dialog-dispatch .dialog-header .btn-default::before {
-      content: "×";
-      font-size: 28px;
-      line-height: 30px;
-    }
-
-    .dialog-dispatch .dialog-body {
-      max-height: calc(88vh - 172px);
-      padding: 0 20px 22px;
-      overflow: auto;
-    }
-
-    .dialog-dispatch .dialog-footer {
-      display: none;
-    }
-
-    .dialog-cabinet {
-      width: 1180px;
-      max-width: 96vw;
-      max-height: 88vh;
-    }
-
-    .dialog-cabinet .dialog-header {
-      padding: 14px 20px;
-      border-bottom: 1px solid #ebeef5;
-    }
-
-    .dialog-cabinet .dialog-header strong {
-      color: #303133;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .dialog-cabinet .dialog-header .btn-default {
-      width: 30px;
-      min-width: 30px;
-      height: 30px;
-      padding: 0;
-      color: #909399;
-      border: 0;
-      background: transparent;
-      font-size: 0;
-    }
-
-    .dialog-cabinet .dialog-header .btn-default::before {
-      content: "×";
-      font-size: 20px;
-      line-height: 30px;
-    }
-
-    .dialog-cabinet .dialog-body {
-      padding: 0 20px 16px;
-      max-height: calc(88vh - 56px);
-      overflow: auto;
-    }
-
-    .dialog-cabinet .dialog-footer {
-      justify-content: center;
-      gap: 12px;
-      padding: 16px 24px 22px;
-      border-top: 1px solid #ebeef5;
-    }
-
-    .cabinet-supplement-page {
-      display: grid;
-      gap: 0;
-    }
-
-    .cabinet-form-grid {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 14px 16px;
-      padding: 16px 0 12px;
-    }
-
-    .cabinet-form-item label {
-      display: block;
-      margin-bottom: 6px;
-      color: #606266;
-      font-size: 13px;
-      line-height: 18px;
-    }
-
-    .cabinet-readonly,
-    .cabinet-input {
-      width: 100%;
-      height: 32px;
-      padding: 0 10px;
-      color: #606266;
-      border: 1px solid #dcdfe6;
-      border-radius: 4px;
-      font-size: 13px;
-      box-sizing: border-box;
-    }
-
-    .cabinet-readonly {
-      display: flex;
-      align-items: center;
-      background: #f5f7fa;
-      border-color: #e4e7ed;
-    }
-
-    .cabinet-input:focus {
-      border-color: #409eff;
-      outline: none;
-    }
-
-    .cabinet-number {
-      padding-right: 4px;
-    }
-
-    .cabinet-form-span5 {
-      grid-column: span 5;
-    }
-
-    .cabinet-supplement-tabs {
-      display: flex;
-      align-items: flex-end;
-      margin-top: 4px;
-      border-bottom: 1px solid #dfe5ee;
-    }
-
-    .cabinet-supplement-tab {
-      min-width: 132px;
-      height: 36px;
-      padding: 0 16px;
-      color: #409eff;
-      background: #fff;
-      border: 1px solid #dfe5ee;
-      border-bottom: 0;
-      border-radius: 4px 4px 0 0;
-      font-size: 13px;
+      justify-content: space-between;
+      font-size: 15px;
       font-weight: 600;
-      cursor: default;
-    }
-
-    .cabinet-supplement-table-wrap {
-      overflow: auto;
-      margin-top: 0;
-      border: 1px solid #e8edf3;
-      border-top: 0;
-      border-radius: 0 0 4px 4px;
-    }
-
-    .cabinet-supplement-table {
-      width: 100%;
-      min-width: 0;
-      table-layout: fixed;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-
-    .cabinet-supplement-table th,
-    .cabinet-supplement-table td {
-      height: auto;
-      min-height: 36px;
-      padding: 8px 10px;
-      color: #4b5563;
-      border-bottom: 1px solid #edf1f6;
-      text-align: center;
-      white-space: normal;
-      vertical-align: middle;
-    }
-
-    .cabinet-supplement-table th {
-      color: #475569;
-      background: #fafafa;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .cabinet-supplement-table tbody td:nth-child(2) {
-      text-align: left;
-    }
-
-    .cabinet-supplement-table tfoot td {
-      color: #303133;
-      background: #fafafa;
-      font-weight: 700;
-    }
-
-    .cabinet-edit-link {
-      color: #409eff;
-      background: none;
-      border: 0;
-      padding: 0;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .cabinet-edit-link:hover {
-      text-decoration: underline;
-    }
-
-    .cabinet-edit-form {
-      display: grid;
-      gap: 16px;
-      padding: 4px 0 8px;
-    }
-
-    .cabinet-edit-row {
-      display: grid;
-      grid-template-columns: 120px minmax(0, 1fr);
-      align-items: center;
-      gap: 12px;
-    }
-
-    .cabinet-edit-row label {
-      color: #606266;
-      font-size: 14px;
-      line-height: 20px;
-      text-align: right;
-      white-space: nowrap;
-    }
-
-    .cabinet-edit-row .cabinet-input {
-      height: 36px;
-      font-size: 14px;
-    }
-
-    .cabinet-vehicle-info {
-      color: #606266;
-      font-size: 12px;
-      line-height: 20px;
-      white-space: nowrap;
-    }
-
-    .cabinet-edit-mask {
-      position: fixed;
-      inset: 0;
-      z-index: 1200;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: rgba(0, 0, 0, 0.45);
-    }
-
-    .cabinet-edit-mask.open {
-      display: flex;
-    }
-
-    .cabinet-edit-mask .dialog-cabinet-edit {
-      width: 560px;
-      max-width: 92vw;
       background: #fff;
-      border-radius: 4px;
-      box-shadow: 0 12px 34px rgba(15, 23, 42, 0.18);
     }
+    .status-icons { display: flex; gap: 5px; font-size: 12px; color: var(--text); }
 
-    .dialog-cabinet-edit .dialog-header {
-      position: relative;
-      justify-content: center;
-      padding: 18px 48px 16px;
-      border-bottom: 0;
-    }
-
-    .dialog-cabinet-edit .dialog-header strong {
-      color: #303133;
-      font-size: 16px;
-      font-weight: 700;
-      text-align: center;
-    }
-
-    .dialog-cabinet-edit .dialog-header .btn-default {
-      position: absolute;
-      right: 16px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 30px;
-      min-width: 30px;
-      height: 30px;
-      padding: 0;
-      color: #909399;
-      border: 0;
-      background: transparent;
-      font-size: 0;
-    }
-
-    .dialog-cabinet-edit .dialog-header .btn-default::before {
-      content: "×";
-      font-size: 20px;
-      line-height: 30px;
-    }
-
-    .dialog-cabinet-edit .dialog-body {
-      padding: 8px 32px 4px;
-      max-height: none;
-      overflow: visible;
-    }
-
-    .dialog-cabinet-edit .dialog-footer {
-      justify-content: center;
-      gap: 12px;
-      padding: 18px 24px 24px;
-      border-top: 0;
-    }
-
-    .dialog-cabinet-edit .btn-default,
-    .dialog-cabinet-edit .btn-action {
-      min-width: 88px;
-      height: 36px;
-      font-size: 14px;
-    }
-
-    .dialog-dispatch .btn-default,
-    .dialog-dispatch .btn-action {
-      height: 38px;
-      min-width: 96px;
-      font-size: 14px;
-    }
-
-    .dialog-dispatch .btn-action {
-      min-width: 128px;
-      font-weight: 700;
-    }
-
-    .dispatch-basic-strip {
-      display: grid;
-      grid-template-columns: repeat(6, minmax(0, 1fr));
-      gap: 10px 20px;
-      padding: 12px 20px 14px;
-      color: #606975;
-      font-size: 12px;
-      line-height: 18px;
-    }
-
-    .dispatch-basic-strip span {
-      display: grid;
-      grid-template-columns: 88px minmax(0, 1fr);
-      align-items: center;
-      min-width: 0;
-    }
-
-    .dispatch-basic-strip strong {
-      min-width: 0;
-      overflow: hidden;
-      color: #606975;
-      font-weight: 400;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .dispatch-basic-strip .blue-link {
-      color: #1677ff;
-    }
-
-    .dispatch-goods-title {
-      display: none;
-    }
-
-    .dispatch-search-row {
-      display: grid;
-      grid-template-columns: 160px 220px 72px;
-      gap: 8px;
-      width: 480px;
-      margin: 12px 0 0;
-    }
-
-    .dispatch-search-row select,
-    .dispatch-search-row input {
-      width: 100%;
-      height: 32px;
-      border: 1px solid #e5eaf1;
-      border-radius: 3px;
-      padding: 0 10px;
-      color: #4b5563;
-      background: #fff;
-      font-size: 12px;
-    }
-
-    .dispatch-search-row button {
-      height: 32px;
-      color: #fff;
-      background: #409eff;
-      border-color: #409eff;
-      border-radius: 3px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .dialog-dispatch .summary-strip {
-      display: none;
-    }
-
-    .dispatch-top-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin: 10px 0 12px;
-    }
-
-    .dispatch-export-bar {
-      display: inline-flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 10px;
-      max-width: 100%;
-    }
-
-    .dispatch-export-tip-wrap {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      flex-shrink: 0;
-    }
-
-    .dispatch-export-tip-icon {
-      width: 18px;
-      height: 18px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: #909399;
-      border: 1px solid #c0c4cc;
-      border-radius: 50%;
-      background: #fff;
-      font-size: 12px;
-      font-weight: 700;
-      line-height: 1;
-      cursor: help;
-    }
-
-    .dispatch-export-tip-popup {
-      display: none;
-      position: absolute;
-      right: calc(100% + 10px);
-      top: 50%;
-      transform: translateY(-50%);
-      width: max-content;
-      max-width: 340px;
-      padding: 8px 12px;
-      color: #fff;
-      background: rgba(48, 49, 51, 0.92);
-      border-radius: 4px;
-      font-size: 12px;
-      line-height: 18px;
-      white-space: normal;
-      text-align: left;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      z-index: 20;
-      pointer-events: none;
-    }
-
-    .dispatch-export-tip-popup::after {
-      content: "";
-      position: absolute;
-      top: 50%;
-      right: -5px;
-      width: 0;
-      height: 0;
-      margin-top: -5px;
-      border-top: 5px solid transparent;
-      border-bottom: 5px solid transparent;
-      border-left: 5px solid rgba(48, 49, 51, 0.92);
-    }
-
-    .dispatch-export-tip-wrap:hover .dispatch-export-tip-popup {
-      display: block;
-    }
-
-    .dispatch-export-btn {
+    /* Nav */
+    .nav-bar {
       height: 48px;
-      padding: 0 22px;
-      color: #fff;
-      background: #409eff;
-      border: 1px solid #409eff;
-      border-radius: 3px;
-      font-size: 18px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .dispatch-export-btn.is-disabled {
-      color: #c0c4cc;
-      background: #f5f7fa;
-      border-color: #e4e7ed;
-      cursor: not-allowed;
-    }
-
-    .dispatch-export-btn.is-disabled:hover {
-      color: #c0c4cc;
-      background: #f5f7fa;
-      border-color: #e4e7ed;
-    }
-
-    .dispatch-tabs {
-      display: flex;
-      align-items: flex-end;
-      border-bottom: 1px solid #dfe5ee;
-    }
-
-    .dispatch-tab {
-      min-width: 96px;
-      height: 36px;
-      padding: 0 16px;
-      color: #333;
-      background: #fff;
-      border: 1px solid #dfe5ee;
-      border-bottom: 0;
-      border-radius: 4px 4px 0 0;
-      font-size: 13px;
-      font-weight: 600;
-    }
-
-    .dispatch-tab + .dispatch-tab {
-      margin-left: -1px;
-    }
-
-    .dispatch-tab.active {
-      color: #409eff;
-    }
-
-    .dispatch-panel {
-      display: none;
-    }
-
-    .dispatch-panel.active {
-      display: block;
-    }
-
-    .dispatch-goods-grid {
-      max-height: 620px;
-      border-radius: 4px;
-      border-color: #e8edf3;
-    }
-
-    .dispatch-cabinet-grid {
-      max-height: 320px;
-      margin-top: 12px;
-      border-radius: 4px;
-      border-color: #e8edf3;
-      scrollbar-color: #8d8f92 #eef2f7;
-      scrollbar-width: auto;
-    }
-
-    .dispatch-cabinet-grid .detail-table {
-      min-width: 2600px;
-      table-layout: fixed;
-      font-size: 12px;
-    }
-
-    .dispatch-cabinet-grid .detail-table th,
-    .dispatch-cabinet-grid .detail-table td {
-      min-width: 120px;
-      height: auto;
-      min-height: 36px;
-      padding: 8px 10px;
-      color: #4b5563;
-      line-height: 20px;
-      white-space: normal;
-      text-align: center;
-      vertical-align: middle;
-    }
-
-    .dispatch-cabinet-grid .detail-table th {
-      min-height: 40px;
-      color: #475569;
-      background: #fafafa;
-      font-weight: 700;
-    }
-
-    .dispatch-cabinet-grid .detail-table th:nth-child(1),
-    .dispatch-cabinet-grid .detail-table td:nth-child(1) {
-      position: sticky;
-      left: 0;
-      z-index: 2;
-      width: 90px;
-      min-width: 90px;
-      background: #fff;
-    }
-
-    .dispatch-cabinet-grid .detail-table th:nth-child(1) {
-      z-index: 3;
-      background: #f8fafc;
-    }
-
-    .dispatch-cabinet-grid .detail-table tfoot td,
-    .dispatch-goods-grid .detail-table tfoot td {
-      min-height: 36px;
-      color: #4b5563;
-      background: #f5f7fb;
-      font-weight: 400;
-    }
-
-    .dispatch-cabinet-grid::-webkit-scrollbar,
-    .dispatch-goods-grid::-webkit-scrollbar {
-      height: 18px;
-    }
-
-    .dispatch-cabinet-grid::-webkit-scrollbar-track,
-    .dispatch-goods-grid::-webkit-scrollbar-track {
-      background: #eef2f7;
-      border-radius: 999px;
-    }
-
-    .dispatch-cabinet-grid::-webkit-scrollbar-thumb,
-    .dispatch-goods-grid::-webkit-scrollbar-thumb {
-      background: #8d8f92;
-      border-radius: 999px;
-      border: 4px solid #eef2f7;
-    }
-
-    .dispatch-goods-grid .detail-table {
-      min-width: 5400px;
-      table-layout: fixed;
-      font-size: 12px;
-    }
-
-    .dispatch-goods-grid .detail-table th,
-    .dispatch-goods-grid .detail-table td {
-      min-width: 88px;
-      height: auto;
-      min-height: 36px;
-      padding: 8px 10px;
-      color: #4b5563;
-      line-height: 20px;
-      vertical-align: top;
-      white-space: normal;
-      text-align: center;
-    }
-
-    .dispatch-goods-grid .detail-table th {
-      min-height: 44px;
-      color: #334155;
-      background: #fafafa;
-      font-weight: 700;
-      vertical-align: middle;
-    }
-
-    .dispatch-goods-grid .detail-table th:nth-child(1),
-    .dispatch-goods-grid .detail-table td:nth-child(1) {
-      position: sticky;
-      left: 0;
-      z-index: 2;
-      width: 56px;
-      min-width: 56px;
-      background: #fff;
-    }
-
-    .dispatch-goods-grid .detail-table th:nth-child(1) {
-      z-index: 3;
-      background: #f8fafc;
-    }
-
-    .dispatch-empty {
-      padding: 32px;
-      color: #94a3b8;
-      text-align: center;
-    }
-
-    .dialog-confirm-edit {
-      width: calc(100vw - 48px);
-      max-width: 1920px;
-      max-height: 92vh;
-    }
-
-    .dialog-confirm-edit .dialog-header {
-      min-height: 48px;
-      padding: 14px 18px 10px;
-      border-bottom: 1px solid #e8edf3;
-    }
-
-    .dialog-confirm-edit .dialog-header strong {
-      color: #303133;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .dialog-confirm-edit .dialog-body {
-      max-height: calc(92vh - 64px);
-      padding: 0 16px 16px;
-      overflow: hidden;
-    }
-
-    .confirm-edit-page {
-      display: flex;
-      flex-direction: column;
-      min-height: 0;
-      height: calc(92vh - 80px);
-    }
-
-    .confirm-filter-wrap {
-      padding: 12px 0 10px;
-      border-bottom: 1px solid #e8edf3;
-    }
-
-    .confirm-filter-line {
       display: grid;
-      grid-template-columns: 220px 200px minmax(0, 1fr) minmax(0, 1fr);
-      gap: 12px 16px;
+      grid-template-columns: 40px 1fr 72px;
       align-items: center;
-    }
-
-    .confirm-filter-line + .confirm-filter-line {
-      margin-top: 10px;
-    }
-
-    .confirm-filter-line-second {
-      grid-template-columns: minmax(0, 1fr) 72px;
-      max-width: 420px;
-    }
-
-    .confirm-filter-field {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      min-width: 0;
-    }
-
-    .confirm-filter-field label {
-      flex: 0 0 auto;
-      color: #606266;
-      font-size: 12px;
-      white-space: nowrap;
-    }
-
-    .confirm-filter-field select,
-    .confirm-filter-field input {
-      flex: 1;
-      min-width: 0;
-      height: 32px;
-      border: 1px solid #dcdfe6;
-      border-radius: 2px;
-      padding: 0 10px;
-      color: #606266;
-      background: #fff;
-    }
-
-    .confirm-sku-field {
-      display: grid;
-      grid-template-columns: 88px minmax(0, 1fr);
-      gap: 8px;
-      align-items: center;
-    }
-
-    .confirm-sku-field select,
-    .confirm-sku-field input {
-      width: 100%;
-      height: 32px;
-      border: 1px solid #dcdfe6;
-      border-radius: 2px;
-      padding: 0 10px;
-      color: #606266;
-      background: #fff;
-    }
-
-    .confirm-filter-line button,
-    #confirmSearchBtn {
-      height: 32px;
-      color: #fff;
-      background: #409eff;
-      border-color: #409eff;
-      border-radius: 2px;
-      font-weight: 600;
-    }
-
-    .confirm-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 8px;
-      padding: 10px 0;
-      flex-wrap: wrap;
-    }
-
-    .confirm-panel-header {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 48px;
-      padding: 0 12px;
-      border-bottom: 1px solid #ebeef5;
-      background: #fafafa;
-    }
-
-    .confirm-panel-header strong {
-      color: #303133;
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .confirm-btn-panel-danger {
-      height: 28px;
-      padding: 0 12px;
-      color: #fff;
-      background: #ef4444;
-      border: 1px solid #ef4444;
-      border-radius: 2px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      white-space: nowrap;
-    }
-
-    .confirm-btn-panel-danger:hover {
-      background: #dc2626;
-      border-color: #dc2626;
-    }
-
-    .confirm-btn-outline {
-      height: 32px;
-      color: #606266;
-      background: #fff;
-      border: 1px solid #dcdfe6;
-      border-radius: 2px;
-      padding: 0 14px;
-      cursor: pointer;
-    }
-
-    .confirm-dropdown {
-      position: relative;
-      display: inline-flex;
-    }
-
-    .confirm-dropdown-menu {
-      display: none;
-      position: absolute;
-      top: calc(100% + 6px);
-      left: 0;
-      z-index: 30;
-      min-width: 156px;
-      overflow: hidden;
-      background: #fff;
-      border: 1px solid #dcdfe6;
-      border-radius: 4px;
-      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.12);
-    }
-
-    .confirm-dropdown.open .confirm-dropdown-menu {
-      display: block;
-    }
-
-    .confirm-dropdown-menu button {
-      display: block;
-      width: 100%;
-      height: 36px;
-      padding: 0 16px;
-      border: 0;
-      color: #606266;
-      background: #fff;
-      font-size: 13px;
-      text-align: left;
-      cursor: pointer;
-    }
-
-    .confirm-dropdown-menu button:hover {
-      color: #409eff;
-      background: #ecf5ff;
-    }
-
-    .confirm-btn-primary {
-      height: 32px;
-      color: #fff;
-      background: #409eff;
-      border-color: #409eff;
-      border-radius: 2px;
-      padding: 0 14px;
-    }
-
-    .confirm-btn-success {
-      height: 32px;
-      color: #fff;
-      background: #67c23a;
-      border-color: #67c23a;
-      border-radius: 2px;
-      padding: 0 16px;
-      font-weight: 600;
-    }
-
-    .confirm-edit-layout {
-      display: grid;
-      grid-template-columns: 320px minmax(0, 1fr);
-      gap: 10px;
-      flex: 1;
-      min-height: 0;
-      overflow: hidden;
-    }
-
-    .confirm-current-row {
-      display: flex;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 18px;
-      padding: 10px 12px;
-      color: #606266;
-      font-size: 12px;
-      background: #fbfdff;
-      border-bottom: 1px solid #ebeef5;
-      flex-shrink: 0;
-    }
-
-    .confirm-current-row strong {
-      color: #303133;
-      font-weight: 600;
-    }
-
-    .confirm-cabinet-panel,
-    .confirm-goods-panel {
-      min-height: 0;
-      border: 1px solid #e8edf3;
-      border-radius: 2px;
-      background: #fff;
-      overflow: hidden;
-    }
-
-    .confirm-cabinet-side,
-    .confirm-goods-side {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      min-height: 0;
-    }
-
-    .confirm-side-title {
-      flex-shrink: 0;
-      padding: 10px 12px;
-      color: #303133;
-      font-size: 13px;
-      font-weight: 700;
-      border-bottom: 1px solid #ebeef5;
-      background: #fafafa;
-    }
-
-    .confirm-toolbar-right {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .confirm-cabinet-list-wrap {
-      flex: 1;
-      min-height: 0;
-      overflow: auto;
-      padding: 10px;
-      scrollbar-color: #c0c4cc #f5f7fa;
-    }
-
-    .confirm-goods-list-wrap {
-      flex: 1;
-      min-height: 0;
-      overflow: auto;
-    }
-
-    .confirm-cabinet-item {
-      display: grid;
-      grid-template-columns: 22px 1fr 78px 44px;
-      align-items: center;
-      gap: 8px;
-      min-height: 76px;
-      border-bottom: 1px solid #e5e7eb;
-      padding: 10px 0;
-      cursor: pointer;
-    }
-
-    .confirm-cabinet-item.active {
-      margin: 0 -10px;
-      padding: 10px;
-      background: #eef6ff;
-      border-left: 3px solid #2f80ed;
-    }
-
-    .confirm-cabinet-name {
-      display: flex;
-      align-items: center;
-      flex-wrap: nowrap;
-      gap: 6px;
-      margin-bottom: 4px;
-      color: #111827;
-      font-size: 13px;
-      line-height: 18px;
-      white-space: nowrap;
-      overflow: hidden;
-      min-width: 0;
-    }
-
-    .confirm-cabinet-name .cabinet-no-text {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      font-weight: 700;
-    }
-
-    .confirm-cabinet-name .cabinet-type-link {
-      flex-shrink: 0;
-      color: #2f80ed;
-      text-decoration: none;
-      font-weight: 700;
-    }
-
-    .confirm-cabinet-meta {
-      color: #6b7280;
-      font-size: 12px;
-      line-height: 20px;
-    }
-
-    .confirm-cabinet-select {
-      width: 78px;
-      height: 32px;
-      border: 1px solid #e5e7eb;
-      border-radius: 4px;
-      background: #fff;
-      font-size: 12px;
-      padding: 0 6px;
-    }
-
-    .confirm-cabinet-count {
-      text-align: center;
-      font-weight: 700;
-      color: #111827;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-
-    .confirm-cabinet-empty {
-      padding: 24px 12px;
-      color: #909399;
-      text-align: center;
-      font-size: 12px;
-    }
-
-    .confirm-stats-bar {
-      display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
-      gap: 0;
-      flex-shrink: 0;
-      overflow: hidden;
-      margin-bottom: 10px;
-      border: 1px solid #e5e7eb;
-      border-radius: 2px;
-      background: #fff;
-    }
-
-    .confirm-stat-item {
-      padding: 14px 18px;
-      border-right: 1px solid #e5e7eb;
-      background: #fff;
-      white-space: nowrap;
-    }
-
-    .confirm-stat-item:last-child {
-      border-right: 0;
-    }
-
-    .confirm-stat-label {
-      color: #6b7280;
-      font-size: 13px;
-      margin-right: 8px;
-    }
-
-    .confirm-stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      color: #111827;
-      line-height: 1.2;
-      vertical-align: middle;
-    }
-
-    .confirm-stat-unit {
-      color: #6b7280;
-      font-size: 13px;
-      font-weight: 400;
-      margin-left: 4px;
-      vertical-align: middle;
-    }
-
-    .confirm-goods-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-
-    .confirm-goods-table th,
-    .confirm-goods-table td {
-      padding: 8px 10px;
-      border: 1px solid #ebeef5;
-      vertical-align: middle;
-      line-height: 20px;
-      color: #606266;
-      white-space: nowrap;
-    }
-
-    .confirm-goods-table th {
-      position: sticky;
-      top: 0;
-      z-index: 1;
-      color: #909399;
-      background: #f5f7fa;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .confirm-cabinet-item:hover:not(.active) {
-      background: #f9fafb;
-    }
-
-    .confirm-goods-table {
-      min-width: 1880px;
-    }
-
-    .confirm-goods-table .operation-col {
-      position: sticky;
-      right: 0;
-      z-index: 3;
-      min-width: 108px;
-      background: #fff;
-      box-shadow: -8px 0 14px rgba(15, 23, 42, 0.06);
-      text-align: center;
-    }
-
-    .confirm-goods-table th.operation-col {
-      z-index: 5;
-      background: #f5f7fa;
-    }
-
-    .confirm-goods-table tbody tr:hover .operation-col {
-      background: #f8fbff;
-    }
-
-    .confirm-goods-table .cell-input {
-      width: 100%;
-      min-width: 72px;
-      height: 28px;
-      border: 1px solid #dcdfe6;
-      border-radius: 2px;
       padding: 0 8px;
-      color: #606266;
+      border-bottom: 1px solid var(--line);
       background: #fff;
-    }
-
-    .confirm-goods-table .cell-input:focus {
-      border-color: #409eff;
-      background: #ecf5ff;
-      outline: none;
-    }
-
-    .confirm-goods-table .cell-input.qty {
-      width: 56px;
-      min-width: 56px;
-      text-align: center;
-    }
-
-    .confirm-tag-label {
-      display: inline-block;
-      padding: 2px 8px;
-      color: #606266;
-      background: #f4f4f5;
-      border-radius: 2px;
-    }
-
-    .confirm-row-actions {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      white-space: nowrap;
-    }
-
-    .confirm-row-actions .text-action {
-      height: auto;
-      padding: 0;
-      background: transparent;
-      border: 0;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .confirm-row-actions .text-action.insert {
-      color: #409eff;
-    }
-
-    .confirm-row-actions .text-action.delete {
-      color: #f56c6c;
-    }
-
-    .confirm-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1200;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.35);
-    }
-
-    .confirm-overlay.open {
-      display: flex;
-    }
-
-    .confirm-overlay-card {
-      width: 420px;
-      max-width: 92vw;
-      background: #fff;
-      border-radius: 4px;
-      box-shadow: 0 12px 34px rgba(30, 41, 59, 0.18);
-      overflow: hidden;
-    }
-
-    .confirm-overlay-card .dialog-header {
-      padding: 16px 20px 8px;
-      border-bottom: 0;
-    }
-
-    .confirm-overlay-card .dialog-body {
-      padding: 8px 20px 20px;
-      color: #606266;
-      font-size: 14px;
-      line-height: 22px;
-      max-height: none;
-      overflow: visible;
-    }
-
-    .confirm-overlay-card .dialog-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      padding: 12px 20px 18px;
-      border-top: 0;
-    }
-
-    .confirm-sub-mask {
-      z-index: 1300;
-    }
-
-    .confirm-sub-modal {
-      width: 980px;
-      max-width: 94vw;
-      max-height: 88vh;
-      overflow: hidden;
-      background: #fff;
-      border-radius: 4px;
-      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.22);
-    }
-
-    .confirm-sub-modal .dialog-header,
-    .confirm-sub-modal .dialog-footer {
-      padding: 14px 18px;
-    }
-
-    .confirm-sub-modal .dialog-body {
-      max-height: calc(88vh - 120px);
-      padding: 0 18px 18px;
-      overflow: auto;
-    }
-
-    .confirm-import-modal {
-      width: 520px;
-    }
-
-    .confirm-import-actions {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-
-    .confirm-import-link {
-      height: auto;
-      padding: 0;
-      color: #409eff;
-      background: transparent;
-      border: 0;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    .confirm-import-notes {
-      color: #606266;
-      font-size: 13px;
-      line-height: 24px;
-    }
-
-    .confirm-import-notes strong {
-      display: block;
-      color: #303133;
-      margin-bottom: 6px;
-    }
-
-    .confirm-selector-stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-
-    .confirm-unarranged-toolbar {
-      display: grid;
-      grid-template-columns: 220px 220px minmax(0, 1fr);
-      gap: 10px;
-      align-items: start;
-      margin-bottom: 10px;
-    }
-
-    .confirm-unarranged-search-col {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      min-width: 0;
-    }
-
-    .confirm-input-group {
-      display: flex;
-      align-items: stretch;
-      min-width: 0;
-      border: 1px solid #dcdfe6;
-      border-radius: 2px;
-      overflow: hidden;
-      background: #fff;
-    }
-
-    .confirm-input-group:focus-within {
-      border-color: #409eff;
-    }
-
-    .confirm-input-label {
-      flex: 0 0 auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 72px;
-      padding: 0 10px;
-      color: #909399;
-      font-size: 12px;
-      white-space: nowrap;
-      background: #f5f7fa;
-      border-right: 1px solid #dcdfe6;
-    }
-
-    .confirm-input-group input {
-      flex: 1;
-      min-width: 0;
-      width: 100%;
-      height: 32px;
-      border: 0;
-      border-radius: 0;
-      padding: 0 10px;
-      color: #606266;
-      background: #fff;
-      font-size: 12px;
-      outline: none;
-    }
-
-    .confirm-input-group input::placeholder {
-      color: #c0c4cc;
-    }
-
-    .confirm-unarranged-search-btn {
-      width: 100%;
-      height: 32px;
-      color: #fff;
-      background: #409eff;
-      border: 1px solid #409eff;
-      border-radius: 2px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .confirm-unarranged-search-btn:hover {
-      background: #66b1ff;
-      border-color: #66b1ff;
-    }
-
-    .confirm-unarranged-foot {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 10px;
-      color: #909399;
-      font-size: 12px;
-    }
-
-    .confirm-unarranged-foot strong {
-      color: #303133;
-      font-weight: 600;
-    }
-
-    .confirm-unarranged-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .confirm-unarranged-btn-exit {
-      height: 32px;
-      padding: 0 16px;
-      color: #606266;
-      background: #fff;
-      border: 1px solid #dcdfe6;
-      border-radius: 2px;
-      font-size: 12px;
-      cursor: pointer;
-    }
-
-    .confirm-unarranged-btn-select {
-      height: 32px;
-      padding: 0 16px;
-      color: #fff;
-      background: #409eff;
-      border: 1px solid #409eff;
-      border-radius: 2px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .confirm-sub-modal .dialog-header .modal-close-x {
-      width: 28px;
-      min-width: 28px;
-      height: 28px;
-      padding: 0;
-      color: #909399;
-      border: 0;
-      background: transparent;
-      font-size: 20px;
-      line-height: 28px;
-      cursor: pointer;
-    }
-
-    .confirm-sub-modal .dialog-header .modal-close-x:hover {
-      color: #303133;
-    }
-
-    .confirm-modal-table-wrap {
-      overflow: auto;
-      max-height: 300px;
-      border: 1px solid #ebeef5;
-      border-radius: 4px;
-    }
-
-    .confirm-modal-table {
-      width: 100%;
-      min-width: 1040px;
-      border-collapse: collapse;
-      font-size: 12px;
-    }
-
-    .confirm-modal-table th,
-    .confirm-modal-table td {
-      padding: 8px 10px;
-      border-bottom: 1px solid #ebeef5;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    .confirm-modal-table th {
       position: sticky;
       top: 0;
-      z-index: 1;
-      color: #909399;
-      background: #f5f7fa;
-      font-weight: 600;
+      z-index: 20;
+    }
+    .nav-btn {
+      width: 36px; height: 36px;
+      border: none; background: transparent;
+      font-size: 20px; color: #4a5560;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .nav-title { text-align: center; font-size: 16px; font-weight: 600; }
+    .nav-right { display: flex; justify-content: flex-end; gap: 2px; }
+    .nav-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(0,0,0,0.06); border-radius: 20px;
+      padding: 4px 10px; font-size: 14px;
     }
 
-    .logic-note {
-      margin-top: 10px;
-      padding: 10px 12px;
-      color: #64748b;
-      font-size: 12px;
-      line-height: 1.6;
-      background: #f8fafc;
-      border-radius: 4px;
+    /* Gallery */
+    .gallery-wrap { background: #fff; }
+    .gallery-main {
+      position: relative;
+      width: 100%; aspect-ratio: 1 / 0.82;
+      background: #eef1f3; overflow: hidden;
+    }
+    .gallery-main > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb-strip {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      display: flex; gap: 8px; padding: 12px 14px;
+      overflow-x: auto; scrollbar-width: none;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.32) 0%, rgba(0, 0, 0, 0.08) 55%, transparent 100%);
+    }
+    .thumb-strip::-webkit-scrollbar { display: none; }
+    .thumb {
+      flex: 0 0 auto; width: 52px; height: 52px;
+      border-radius: 8px; overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.75); padding: 0;
+      background: #eef1f3; cursor: pointer;
+    }
+    .thumb.active {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+    /* Product info */
+    .info-block { padding: 0 16px 16px; background: #fff; }
+    .product-title {
+      font-size: 22px; font-weight: 700; line-height: 1.25;
+      margin-bottom: 8px; letter-spacing: -0.01em;
+    }
+    .meta-row {
+      font-size: 12px; color: var(--muted);
+      margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    }
+    .badge {
+      display: inline-flex; align-items: center;
+      height: 22px; padding: 0 8px; border-radius: 4px;
+      background: var(--tag-bg); color: var(--tag-text);
+      font-size: 11px; font-weight: 600; margin-bottom: 10px;
+    }
+    .price-row {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 14px;
+    }
+    .price-main { font-size: 28px; font-weight: 700; flex-shrink: 0; color: var(--text); }
+    .price-main .currency,
+    .price-main .unit { color: #b8c0c5; font-weight: 400; }
+    .price-main .currency { font-size: 16px; }
+    .price-main .unit { font-size: 14px; }
+    .price-main .amount { font-weight: 700; color: var(--text); }
+    .price-meta {
+      font-size: 12px; color: var(--muted);
+      text-align: right; flex: 1; line-height: 1.4;
     }
 
-    .summary-strip {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin: 8px 0 10px;
+    /* Spec rows */
+    .spec-list { border-top: 1px solid var(--line); padding-top: 4px; }
+    .spec-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 11px 0; border-bottom: 1px solid var(--line);
+      font-size: 13px; color: #4a5560;
     }
+    .spec-item:last-child { border-bottom: none; }
+    .spec-icon {
+      width: 18px; height: 18px; flex-shrink: 0;
+      color: var(--muted); margin-top: 1px;
+    }
+    .spec-item strong { color: var(--text); font-weight: 500; }
+    .attr-grid-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 14px 0; cursor: pointer;
+      border-top: 1px solid var(--line); margin-top: 4px;
+    }
+    .attr-col { flex: 1; min-width: 0; text-align: center; }
+    .attr-val {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .attr-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      background: #eef1f3; border: 1px solid #dfe6ea; flex-shrink: 0;
+    }
+    .attr-lbl { font-size: 11px; color: var(--muted); }
+    .attr-grid-row .chev { color: var(--muted); font-size: 18px; flex-shrink: 0; padding-left: 4px; }
 
-    .summary-strip span {
-      padding: 5px 8px;
-      color: #334155;
-      background: #f8fafc;
-      border: 1px solid #edf1f6;
-      border-radius: 3px;
+    /* Tabs */
+    .tabs-wrap {
+      background: #fff; margin-top: 8px;
+      border-top: 8px solid var(--bg);
+    }
+    .tabs {
+      display: flex; gap: 0; overflow-x: auto;
+      padding: 0 16px; border-bottom: 1px solid var(--line);
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex: 0 0 auto; border: none; background: transparent;
+      padding: 14px 12px 12px; font-size: 14px; color: var(--muted);
+      border-bottom: 2px solid transparent; cursor: pointer;
       white-space: nowrap;
     }
+    .tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--primary); }
 
-    .detail-filter-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 10px;
+    .tab-panel { padding: 16px; background: #fff; font-size: 13px; line-height: 1.7; color: #56646d; }
+    .tab-panel h4 { font-size: 14px; color: var(--text); margin: 16px 0 8px; }
+    .tab-panel h4:first-child { margin-top: 0; }
+    .tab-panel ul { padding-left: 18px; }
+    .tab-panel li { margin-bottom: 6px; }
+    .story-img { width: 100%; border-radius: 12px; margin-top: 14px; display: block; }
+
+    .story-carousel {
+      position: relative; margin-top: 14px; border-radius: 12px; overflow: hidden;
+      background: #eef1f3; aspect-ratio: 16 / 10;
     }
-
-    .detail-filter-row input {
-      flex: 1;
-      min-width: 0;
-      height: 32px;
-      border: 1px solid var(--line);
-      border-radius: 2px;
-      padding: 0 10px;
+    .story-carousel img {
+      width: 100%; height: 100%; object-fit: cover; display: block;
     }
+    .carousel-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      width: 32px; height: 32px; border: none; border-radius: 50%;
+      background: rgba(255,255,255,0.88); color: #4a5560;
+      font-size: 20px; cursor: pointer; display: flex;
+      align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    }
+    .carousel-nav.prev { left: 10px; }
+    .carousel-nav.next { right: 10px; }
+    .carousel-dots {
+      position: absolute; bottom: 10px; left: 0; right: 0;
+      display: flex; justify-content: center; gap: 6px;
+    }
+    .carousel-dot {
+      width: 6px; height: 6px; border-radius: 50%; border: none;
+      background: rgba(255,255,255,0.55); padding: 0; cursor: pointer;
+    }
+    .carousel-dot.on { background: #fff; width: 8px; height: 8px; }
 
-    .dialog-header,
-    .dialog-footer {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 14px 18px;
+    /* Recommend product cards */
+    .rec-section { margin-top: 20px; }
+    .rec-tabs {
+      display: flex; gap: 0; margin-bottom: 14px;
       border-bottom: 1px solid var(--line);
     }
+    .rec-tab {
+      flex: 1; border: none; background: transparent;
+      padding: 10px 0; font-size: 14px; color: var(--muted); cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+    .rec-tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--primary); }
+    .rec-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px;
+    }
+    .rec-card { cursor: pointer; }
+    .rec-img-wrap {
+      position: relative; border-radius: 10px; overflow: hidden;
+      background: #eef1f3; aspect-ratio: 1/1; margin-bottom: 8px;
+    }
+    .rec-img-wrap > img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .rec-thumbs-overlay {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      display: flex; gap: 4px; padding: 8px;
+      background: linear-gradient(to top, rgba(0,0,0,0.28), transparent);
+    }
+    .rec-thumbs-overlay span {
+      width: 30px; height: 30px; border-radius: 4px;
+      overflow: hidden; flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.75);
+      background: #eef1f3;
+    }
+    .rec-thumbs-overlay img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .rec-more {
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.9); font-size: 10px;
+      font-weight: 600; color: var(--text);
+    }
+    .rec-title-row {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 6px; margin-bottom: 6px;
+    }
+    .rec-name {
+      flex: 1; font-size: 12px; line-height: 1.35;
+      overflow: hidden; text-overflow: ellipsis;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+      color: var(--text); min-width: 0;
+    }
+    .rec-fav {
+      border: none; background: transparent; padding: 0;
+      font-size: 18px; line-height: 1; color: #56646d;
+      cursor: pointer; flex-shrink: 0;
+    }
+    .rec-fav.on { color: var(--danger); }
+    .rec-price { font-size: 16px; font-weight: 700; line-height: 1.2; margin-bottom: 2px; color: var(--text); }
+    .rec-price .currency,
+    .rec-price .unit { color: #b8c0c5; font-weight: 400; }
+    .rec-price .currency { font-size: 12px; }
+    .rec-price .unit { font-size: 11px; }
+    .rec-price .amount { font-weight: 700; color: var(--text); }
+    .rec-item {
+      font-size: 11px; color: var(--muted); margin-bottom: 4px;
+    }
+    .rec-shipping {
+      font-size: 11px; color: var(--muted); line-height: 1.5;
+      display: flex; flex-wrap: wrap; gap: 2px 10px;
+    }
 
-    .dialog-footer {
-      justify-content: flex-end;
-      gap: 8px;
+    /* Bottom bar */
+    .bottom-bar {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 430px;
+      background: #fff;
       border-top: 1px solid var(--line);
-      border-bottom: 0;
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      display: grid; grid-template-columns: 48px 1fr; gap: 12px;
+      align-items: center; z-index: 30;
+    }
+    .bar-icon {
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      border: none; background: transparent; cursor: pointer; color: #78848d;
+      font-size: 10px;
+    }
+    .bar-icon .ico { font-size: 22px; color: #56646d; font-weight: 400; }
+    .bar-icon.active .ico { color: var(--danger); font-weight: 700; }
+    .btn-wishlist {
+      height: 44px; border: none; border-radius: 8px;
+      background: var(--primary); color: #fff;
+      font-size: 15px; font-weight: 600; cursor: pointer; width: 100%;
+    }
+    .btn-wishlist:active { background: var(--primary-dark); }
+
+    /* Overlay & Sheet */
+    .overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(14, 23, 28, 0.45);
+      display: none; align-items: flex-end; justify-content: center;
+    }
+    .overlay.open { display: flex; }
+
+    .sheet {
+      width: 100%; max-width: 430px;
+      background: #fff; border-radius: 16px 16px 0 0;
+      display: flex; flex-direction: column;
+      animation: slideUp 0.28s ease;
+    }
+    .sheet-param { max-height: 75vh; height: 75vh; }
+    .sheet-picker { max-height: 88vh; height: 88vh; }
+    @keyframes slideUp {
+      from { transform: translateY(100%); }
+      to { transform: translateY(0); }
     }
 
-    .dialog-body {
-      padding: 16px 18px;
-      max-height: 58vh;
-      overflow: auto;
-      line-height: 22px;
+    .sheet-header {
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px 48px 12px; position: relative;
+      border-bottom: 1px solid var(--line); flex-shrink: 0;
+    }
+    .sheet-header h3 { font-size: 16px; font-weight: 600; }
+    .sheet-close {
+      position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+      width: 32px; height: 32px; border: none; background: transparent;
+      font-size: 22px; color: #78848d; cursor: pointer;
     }
 
-    .dialog-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px 16px;
-      font-size: 12px;
+    .sheet-body { overflow-y: auto; flex: 1; padding: 0 16px 16px; }
+
+    /* Parameter list sheet */
+    .param-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 0; border-bottom: 1px solid var(--line);
+      font-size: 14px;
+    }
+    .param-row .label { color: var(--muted); }
+    .param-row .value { color: var(--text); text-align: right; max-width: 60%; }
+
+    .sheet-footer {
+      flex-shrink: 0; border-top: 1px solid var(--line);
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      background: #fff;
+    }
+    .footer-summary {
+      display: flex; align-items: center; flex-wrap: wrap;
+      gap: 8px 10px; margin-bottom: 10px;
+    }
+    .footer-check {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 13px; cursor: pointer; flex-shrink: 0;
+    }
+    .footer-check input { width: 16px; height: 16px; accent-color: var(--primary); }
+    .footer-total { font-size: 13px; white-space: nowrap; }
+    .footer-total strong { color: var(--total-red); font-size: 16px; font-weight: 700; }
+    .footer-selected {
+      font-size: 12px; color: var(--muted); cursor: pointer;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .footer-selected strong { color: var(--text); }
+    .footer-actions { display: flex; gap: 10px; width: 100%; }
+    .footer-actions .btn-wishlist { flex: 1; }
+
+    .picker-preview {
+      display: flex; gap: 12px; padding: 14px 16px;
+      border-bottom: 1px solid var(--line); flex-shrink: 0;
+    }
+    .picker-preview img {
+      width: 72px; height: 72px; border-radius: 8px;
+      object-fit: cover; background: #eef1f3; flex-shrink: 0;
+    }
+    .picker-preview-info { flex: 1; min-width: 0; }
+    .picker-preview-info h4 {
+      font-size: 13px; line-height: 1.35; margin-bottom: 6px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .picker-price { font-size: 22px; font-weight: 700; }
+    .picker-price .currency, .picker-price .unit { color: #b8c0c5; font-weight: 400; font-size: 14px; }
+    .picker-price .amount { font-weight: 700; color: var(--text); }
+    .picker-moq { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    .sale-tabs {
+      display: flex; margin: 0 16px 14px; position: relative;
+      height: 40px; border-radius: 8px; overflow: hidden;
+      background: #f0f2f4; flex-shrink: 0;
+    }
+    .sale-tab {
+      flex: 1; border: none; background: transparent;
+      font-size: 14px; color: #56646d; cursor: pointer;
+      position: relative; z-index: 1; height: 100%;
+    }
+    .sale-tab.active {
+      background: rgba(44, 217, 198, 0.18); color: #149c88;
+      font-weight: 600; z-index: 2;
+    }
+    .sale-tab.active:first-child::after {
+      content: ''; position: absolute; right: -10px; top: 0;
+      width: 20px; height: 100%;
+      background: rgba(44, 217, 198, 0.18);
+      clip-path: polygon(0 0, 100% 50%, 0 100%);
+      z-index: 3;
     }
 
-    .dialog-grid span {
-      color: var(--muted);
+    .picker-section { margin-bottom: 16px; }
+    .picker-section > label {
+      display: block; font-size: 12px; color: var(--muted);
+      margin-bottom: 10px;
     }
 
-    .page-view[hidden] {
-      display: none !important;
+    .color-options {
+      display: flex; gap: 10px; overflow-x: auto;
+      flex-wrap: nowrap; padding-bottom: 4px; scrollbar-width: none;
+    }
+    .color-options::-webkit-scrollbar { display: none; }
+    .color-opt {
+      position: relative; display: flex; flex-direction: column;
+      align-items: center; gap: 6px; cursor: pointer;
+      border: 2px solid transparent; border-radius: 10px;
+      padding: 8px 6px; flex: 0 0 auto; width: 86px;
+    }
+    .color-opt.active { border-color: #2b3136; }
+    .color-opt img {
+      width: 56px; height: 56px; border-radius: 8px;
+      object-fit: cover; background: #eef1f3;
+    }
+    .color-opt span { font-size: 10px; text-align: center; line-height: 1.3; width: 100%; }
+    .color-badge {
+      position: absolute; top: 2px; right: 2px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--primary); color: #fff;
+      font-size: 10px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
     }
 
-    .customs-highlight td {
-      background: #ecf5ff;
+    .size-options { display: flex; flex-wrap: wrap; gap: 10px; }
+    .size-opt {
+      min-width: 72px; height: 38px; padding: 0 14px;
+      border: 1px solid #dfe6ea; border-radius: 8px;
+      background: #fff; font-size: 13px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .size-opt.active { border-color: #2b3136; border-width: 2px; font-weight: 600; }
+
+    .sku-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 12px; border-radius: 12px; margin-bottom: 10px;
+      border: 1px solid var(--line); background: #fff;
+    }
+    .sku-row.selected {
+      background: rgba(44, 217, 198, 0.14);
+      border-color: rgba(44, 217, 198, 0.35);
+    }
+    .sku-info { flex: 1; min-width: 0; }
+    .sku-name { font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+    .sku-stock { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .tag-disco {
+      display: inline-flex; align-items: center;
+      height: 18px; padding: 0 6px; border-radius: 4px;
+      background: #fde8ea; color: var(--disco);
+      font-size: 10px; font-weight: 600;
+    }
+    .sold-out { font-size: 13px; color: var(--muted); padding: 0 8px; }
+
+    .stepper {
+      display: grid; grid-template-columns: 32px 36px 32px;
+      border: 1px solid #dfe6ea; border-radius: 8px; overflow: hidden;
+      background: #fff;
+    }
+    .stepper button {
+      border: none; background: #fff; font-size: 16px;
+      cursor: pointer; color: #56646d; height: 32px;
+    }
+    .stepper button:disabled { color: #ccc; cursor: not-allowed; }
+    .stepper input {
+      border: none; border-left: 1px solid #edf1f4;
+      border-right: 1px solid #edf1f4;
+      text-align: center; font-size: 14px; width: 100%;
+      outline: none; height: 32px;
     }
 
-    .customs-back-link {
-      color: var(--primary);
-      cursor: pointer;
-      font-size: 13px;
+    .sheet-clear {
+      position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+      border: none; background: transparent; color: var(--primary);
+      font-size: 14px; cursor: pointer;
     }
 
-    .customs-back-link:hover {
-      text-decoration: underline;
+    .selected-item {
+      display: flex; gap: 10px; padding: 12px 0;
+      border-bottom: 1px solid var(--line); align-items: center;
     }
-
-    .log-item {
-      padding: 10px 12px;
-      border: 1px solid var(--line);
-      border-radius: 4px;
-      background: #fbfdff;
+    .selected-item img {
+      width: 56px; height: 56px; border-radius: 8px;
+      object-fit: cover; background: #eef1f3; flex-shrink: 0;
     }
-
-    .log-item strong {
-      display: block;
-      margin-bottom: 4px;
-      color: #1f2937;
-    }
-
-    .form-row {
-      display: grid;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-
-    .form-row label {
-      color: #64748b;
-      font-size: 12px;
-    }
-
-    .form-row input {
-      height: 32px;
-      border: 1px solid var(--line);
-      border-radius: 2px;
-      padding: 0 10px;
-    }
+    .selected-info { flex: 1; min-width: 0; }
+    .selected-desc { font-size: 12px; line-height: 1.4; margin-bottom: 4px; }
+    .selected-price { font-size: 13px; font-weight: 600; }
+    .selected-stock { font-size: 11px; color: var(--muted); margin-top: 2px; }
 
     .toast {
-      position: fixed;
-      top: 18px;
-      left: 50%;
-      z-index: 50;
-      transform: translateX(-50%) translateY(-60px);
-      min-width: 260px;
-      padding: 10px 18px;
-      color: #fff;
-      background: #111827;
-      border-radius: 999px;
-      text-align: center;
-      opacity: 0;
-      transition: 0.22s ease;
+      position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: rgba(20, 30, 36, 0.82); color: #fff;
+      padding: 12px 24px; border-radius: 10px; font-size: 14px;
+      z-index: 200; pointer-events: none; opacity: 0;
+      transition: opacity 0.25s;
     }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    @media (max-width: 1200px) {
-      .app {
-        grid-template-columns: 96px minmax(0, 1fr);
-      }
-
-      .quick-search {
-        grid-template-columns: repeat(2, minmax(180px, 1fr)) auto auto;
-      }
-    }
+    .toast.show { opacity: 1; }
   </style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="logo">基础配置</div>
-      <div class="menu-title">订单管理</div>
-      <div class="menu-item">咨询单列表</div>
-      <div class="menu-item">交期反馈配置</div>
-      <div class="menu-item">PO单列表</div>
-      <div class="menu-item">PO单列表(审核)</div>
-      <div class="menu-item">BPS单列表</div>
-      <div class="menu-item">排柜管理</div>
-      <div class="menu-item active" data-page="shipment">发运单列表</div>
-      <div class="menu-item">仓库列表</div>
-      <div class="menu-item">CI单管理</div>
-      <div class="menu-item" data-page="customs">报关管理</div>
-    </aside>
+  <noscript><p style="padding:20px;text-align:center">Please enable JavaScript to view this demo.</p></noscript>
+  <div class="phone" id="app"><p style="padding:24px;text-align:center;color:#78848d">Loading...</p></div>
 
-    <main class="content">
-      <div class="tabs" id="mainTabs">
-        <div class="tab active" data-page="shipment"><span>发运单列表</span><span>×</span></div>
+  <div class="overlay" id="overlayParam">
+    <div class="sheet sheet-param" onclick="event.stopPropagation()">
+      <div class="sheet-header">
+        <h3>Parameter</h3>
+        <button class="sheet-close" data-close="param">×</button>
       </div>
-
-      <div class="demo-update-banner" id="demoUpdateBanner">
-        <strong>提示：</strong>当前版本 demo 已更新，请刷新（Ctrl+F5）查看；刷新时间：<span id="demoUpdateTime">2026-06-10 11:32:23</span>
-      </div>
-
-      <div class="page-view" id="shipmentListView">
-      <section class="card search-card">
-        <div class="search-title">搜索筛选</div>
-        <div class="filter-layout">
-          <div class="quick-search">
-            <div class="filter-field">
-              <label>客户</label>
-              <div class="field customer-type">
-                <select id="customerField">
-                  <option value="memberBname">客户名称</option>
-                  <option value="memberBcode">客户ID</option>
-                </select>
-                <input id="customerKeyword" placeholder="请输入">
-              </div>
-            </div>
-            <div class="filter-field">
-              <label>单号查询</label>
-              <div class="field number-field">
-                <select id="numberType">
-                  <option value="sendgoodsCode">发运单号</option>
-                  <option value="contractNbillcode">林氏PI单号</option>
-                  <option value="contractBillcode">BPS订单号</option>
-                </select>
-                <input id="numberKeyword" placeholder="请输入单号">
-              </div>
-            </div>
-            <div class="filter-field">
-              <label>发运单状态</label>
-              <div class="field">
-                <select id="shipmentStatus">
-                  <option value="" selected></option>
-                  <option value="1">草稿</option>
-                  <option value="22">待付款</option>
-                  <option value="25">待发运</option>
-                  <option value="3">已发运</option>
-                  <option value="6">待装箱</option>
-                  <option value="61">装箱中</option>
-                  <option value="-2">已作废</option>
-                  <option value="4">已放提单</option>
-                  <option value="5">已截货</option>
-                  <option value="62">部分发运</option>
-                  <option value="63">等待NBO新批次</option>
-                  <option value="65">修改NBO异常</option>
-                  <option value="2">发运异常</option>
-                </select>
-              </div>
-            </div>
-            <div class="filter-field">
-              <label>申请报关状态</label>
-              <div class="field">
-                <select id="declareStatus">
-                  <option value="" selected></option>
-                  <option value="0">待处理</option>
-                  <option value="1">已申报</option>
-                </select>
-              </div>
-            </div>
-            <div class="filter-field date-filter">
-              <label>时间范围</label>
-              <div class="date-filter-row">
-                <select id="dateType" class="date-type-select">
-                  <option value="gmtCreate">创建时间</option>
-                  <option value="sendgoodsVaildate">发货时间</option>
-                </select>
-                <div class="date-range-box">
-                  <input id="startDate" type="date" value="2025-12-02">
-                  <span class="date-separator">-</span>
-                  <input id="endDate" type="date" value="2026-06-02">
-                </div>
-                <div class="search-actions inline">
-                  <button class="btn-action" type="button" onclick="applyFilters()">查询</button>
-                  <button class="btn-action btn-reset" type="button" onclick="resetFilters()">↻ 重置</button>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div class="sheet-body" id="paramBody"></div>
+      <div class="sheet-footer">
+        <div class="footer-actions">
+          <button class="btn-wishlist" data-open-picker>+ add to wishlist</button>
         </div>
-      </section>
-
-      <div class="toolbar">
-        <button class="btn-action" type="button" onclick="applyCustomsDeclaration()">申请报关</button>
-        <div class="dropdown" id="exportDropdown">
-          <button class="btn-export-trigger" type="button" onclick="toggleExport(event)">导出<span class="export-chevron">▾</span></button>
-          <div class="dropdown-menu">
-            <button class="export-menu-item" type="button" onclick="handleExport(&#39;list&#39;)">导出发运单</button>
-            <button class="export-menu-item" type="button" onclick="handleExport(&#39;detail&#39;)">导出发运单详情</button>
-            <button class="export-menu-item" type="button" onclick="handleExport(&#39;rebate&#39;)">导出发运单的返利明细</button>
-            <button class="export-menu-item" type="button" onclick="handleExport(&#39;batch&#39;)">导出批次单详情</button>
-          </div>
-        </div>
-      </div>
-
-      <section class="card table-card">
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr id="tableHead">
-      <th><input type="checkbox" id="checkAll"></th>
-      <th>发运单号</th><th>客户信息</th><th>明细单号</th><th>状态</th><th>总金额</th><th>总数量</th><th>总方数</th><th>发货时间</th><th>创建人 / 创建时间</th><th>阿里订单号</th><th>计划装柜日期</th><th>实际装柜日期</th><th>贸易方式</th><th>商品数量</th><th>包件数量</th><th>装货港</th><th>申请报关状态</th><th>报关单号</th><th>报关金额</th><th>贸易国</th><th>报关单合同协议号</th><th>更新人/更新时间</th><th class="col-fixed-right">操作</th>
-    </tr>
-            </thead>
-            <tbody id="tableBody">
-      <tr data-code="FYD260528024385">
-        <td><input type="checkbox" class="row-check" data-code="FYD260528024385"></td>
-        <td><a class="link" data-detail="FYD260528024385">FYD260528024385</a><span class="copy" data-copy="FYD260528024385">⧉</span></td><td>客户ID：10000210595407<br>客户名称：FortyTwo Pte. Ltd.</td><td>林氏PI：L26020431009<br>客户PO：Customized-0112<br>BPS订单：B26020431021</td><td><span class="status">待装箱</span></td><td><div class="money">实际总额：$18,289.87<br>调价总额：<a class="link" data-adjust="FYD260528024385">$3,955.68</a></div></td><td>商品数：266<br>包件数：448</td><td>147.990 m3</td><td>-</td><td>Amy / 2026-05-28 10:22</td><td>ALI260528001</td><td>2026-06-06</td><td>-</td><td>FOB</td><td>266</td><td>448</td><td>宁波港</td><td>已申报</td><td>BG260528002</td><td>$18,289.87</td><td>中国</td><td>HT-260528-B</td><td>Lily / 2026-06-01 14:10</td><td class="col-fixed-right"><div class="action-cell"><button type="button" class="action-link" data-action="补充装柜信息" data-code="FYD260528024385">补充装柜信息</button><button type="button" class="action-link" data-action="确认装箱" data-code="FYD260528024385">确认装箱</button><button type="button" class="action-link" data-action="日志" data-code="FYD260528024385">日志</button></div></td>
-      </tr>
-    
-      <tr data-code="FYD260528024379">
-        <td><input type="checkbox" class="row-check" data-code="FYD260528024379"></td>
-        <td><a class="link" data-detail="FYD260528024379">FYD260528024379</a><span class="copy" data-copy="FYD260528024379">⧉</span></td><td>客户ID：10000210595407<br>客户名称：FortyTwo Pte. Ltd.</td><td>林氏PI：L26041536218<br>客户PO：MAY STOCK PART 1<br>BPS订单：B26042036326</td><td><span class="status">待发运</span></td><td><div class="money">实际总额：$16,552.12<br>调价总额：<a class="link" data-adjust="FYD260528024379">$1,564.92</a></div></td><td>商品数：230<br>包件数：389</td><td>128.340 m3</td><td>-</td><td>Amy / 2026-05-28 09:54</td><td>-</td><td>2026-06-05</td><td>-</td><td>CIF</td><td>230</td><td>389</td><td>上海港</td><td>已申报</td><td>BG260528001</td><td>$16,552.12</td><td>中国</td><td>HT-260528-A</td><td>Eric / 2026-06-02 09:08</td><td class="col-fixed-right"><div class="action-cell"><button type="button" class="action-link" data-action="确认装箱" data-code="FYD260528024379">确认装箱</button><button type="button" class="action-link" data-action="查看报关详情" data-code="FYD260528024379">查看报关详情</button><button type="button" class="action-link" data-action="日志" data-code="FYD260528024379">日志</button></div></td>
-      </tr>
-    
-      <tr data-code="FYD260528024359">
-        <td><input type="checkbox" class="row-check" data-code="FYD260528024359"></td>
-        <td><a class="link" data-detail="FYD260528024359">FYD260528024359</a><span class="copy" data-copy="FYD260528024359">⧉</span></td><td>客户ID：10000210661092<br>客户名称：DECORACIONES CASABELLA LECHERIA, C.A</td><td>林氏PI：L26042736530<br>客户PO：LS-BK260119<br>BPS订单：B26042736533</td><td><span class="status">已发运</span></td><td><div class="money">实际总额：$1,809.35<br>调价总额：<a class="link" data-adjust="FYD260528024359">$0.00</a></div></td><td>商品数：9<br>包件数：15</td><td>4.730 m3</td><td>2026-06-02 11:00</td><td>Cindy / 2026-05-28 08:42</td><td>-</td><td>2026-05-31</td><td>2026-06-01</td><td>FOB</td><td>9</td><td>15</td><td>盐田港</td><td>待处理</td><td>-</td><td>$0.00</td><td>中国</td><td>-</td><td>Cindy / 2026-06-02 11:12</td><td class="col-fixed-right"><div class="action-cell"><button type="button" class="action-link" data-action="补充装柜信息" data-code="FYD260528024359">补充装柜信息</button><button type="button" class="action-link" data-action="日志" data-code="FYD260528024359">日志</button></div></td>
-      </tr>
-    
-      <tr data-code="FYD260528024312">
-        <td><input type="checkbox" class="row-check" data-code="FYD260528024312"></td>
-        <td><a class="link" data-detail="FYD260528024312">FYD260528024312</a><span class="copy" data-copy="FYD260528024312">⧉</span></td><td>客户ID：10000210595407<br>客户名称：FortyTwo Pte. Ltd.</td><td>林氏PI：-<br>客户PO：-<br>BPS订单：-</td><td><span class="status">已作废</span></td><td><div class="money">实际总额：$0.00<br>调价总额：<a class="link" data-adjust="FYD260528024312">$0.00</a></div></td><td>商品数：0<br>包件数：0</td><td>0.850 m3</td><td>-</td><td>Lily / 2026-05-27 16:31</td><td>-</td><td>-</td><td>-</td><td>FOB</td><td>-</td><td>-</td><td>-</td><td>待处理</td><td>-</td><td>$0.00</td><td>-</td><td>-</td><td>Lily / 2026-05-28 12:21</td><td class="col-fixed-right"><div class="action-cell"><button type="button" class="action-link" data-action="日志" data-code="FYD260528024312">日志</button></div></td>
-      </tr>
-    
-      <tr data-code="FYD260528024280">
-        <td><input type="checkbox" class="row-check" data-code="FYD260528024280"></td>
-        <td><a class="link" data-detail="FYD260528024280">FYD260528024280</a><span class="copy" data-copy="FYD260528024280">⧉</span></td><td>客户ID：10000210595407<br>客户名称：FortyTwo Pte. Ltd.</td><td>林氏PI：L26050137009<br>客户PO：JUNE PROMO<br>BPS订单：B26050137010</td><td><span class="status">装箱中</span></td><td><div class="money">实际总额：$8,620.00<br>调价总额：<a class="link" data-adjust="FYD260528024280">$261.00</a></div></td><td>商品数：88<br>包件数：122</td><td>48.520 m3</td><td>-</td><td>Ray / 2026-05-26 19:20</td><td>-</td><td>2026-06-03</td><td>-</td><td>EXW</td><td>88</td><td>122</td><td>厦门港</td><td>待处理</td><td>-</td><td>$0.00</td><td>中国</td><td>-</td><td>Ray / 2026-06-01 18:30</td><td class="col-fixed-right"><div class="action-cell"><button type="button" class="action-link" data-action="补充装柜信息" data-code="FYD260528024280">补充装柜信息</button><button type="button" class="action-link" data-action="日志" data-code="FYD260528024280">日志</button></div></td>
-      </tr>
-    
-      <tr data-code="FYD260528024266">
-        <td><input type="checkbox" class="row-check" data-code="FYD260528024266"></td>
-        <td><a class="link" data-detail="FYD260528024266">FYD260528024266</a><span class="copy" data-copy="FYD260528024266">⧉</span></td><td>客户ID：10000210999121<br>客户名称：SUNRISE HOME INC.</td><td>林氏PI：L26033035110<br>客户PO：SPRING-02<br>BPS订单：B26033035118</td><td><span class="status">已放提单</span></td><td><div class="money">实际总额：$23,180.40<br>调价总额：<a class="link" data-adjust="FYD260528024266">$0.00</a></div></td><td>商品数：310<br>包件数：510</td><td>172.980 m3</td><td>2026-05-30 16:08</td><td>Nina / 2026-05-20 10:11</td><td>-</td><td>2026-05-28</td><td>2026-05-29</td><td>FOB</td><td>310</td><td>510</td><td>宁波港</td><td>已申报</td><td>BG260530007</td><td>$23,180.40</td><td>中国</td><td>HT-260530-C</td><td>Nina / 2026-06-01 09:21</td><td class="col-fixed-right"><div class="action-cell"><button type="button" class="action-link" data-action="补充装柜信息" data-code="FYD260528024266">补充装柜信息</button><button type="button" class="action-link" data-action="查看报关详情" data-code="FYD260528024266">查看报关详情</button><button type="button" class="action-link" data-action="日志" data-code="FYD260528024266">日志</button></div></td>
-      </tr>
-    
-      <tr data-code="FYD260528024201">
-        <td><input type="checkbox" class="row-check" data-code="FYD260528024201"></td>
-        <td><a class="link" data-detail="FYD260528024201">FYD260528024201</a><span class="copy" data-copy="FYD260528024201">⧉</span></td><td>客户ID：10000210595407<br>客户名称：FortyTwo Pte. Ltd.</td><td>林氏PI：L26050137011<br>客户PO：-<br>BPS订单：B26050137012</td><td><span class="status">待付款</span></td><td><div class="money">实际总额：$3,200.00<br>调价总额：<a class="link" data-adjust="FYD260528024201">$0.00</a></div></td><td>商品数：40<br>包件数：60</td><td>22.320 m3</td><td>-</td><td>Amy / 2026-05-25 15:00</td><td>-</td><td>2026-06-08</td><td>-</td><td>FOB</td><td>40</td><td>60</td><td>宁波港</td><td>待处理</td><td>-</td><td>$0.00</td><td>中国</td><td>-</td><td>Amy / 2026-05-26 09:00</td><td class="col-fixed-right"><div class="action-cell"><button type="button" class="action-link" data-action="确认发运单" data-code="FYD260528024201">确认发运单</button><button type="button" class="action-link" data-action="临时授信" data-code="FYD260528024201">临时授信</button><button type="button" class="action-link" data-action="日志" data-code="FYD260528024201">日志</button></div></td>
-      </tr>
-    
-      <tr data-code="FYD260528024188">
-        <td><input type="checkbox" class="row-check" data-code="FYD260528024188"></td>
-        <td><a class="link" data-detail="FYD260528024188">FYD260528024188</a><span class="copy" data-copy="FYD260528024188">⧉</span></td><td>客户ID：10000210595407<br>客户名称：FortyTwo Pte. Ltd.</td><td>林氏PI：L26050137013<br>客户PO：-<br>BPS订单：B26050137014</td><td><span class="status">等待NBO新批次</span></td><td><div class="money">实际总额：$5,600.00<br>调价总额：<a class="link" data-adjust="FYD260528024188">$0.00</a></div></td><td>商品数：55<br>包件数：88</td><td>30.690 m3</td><td>-</td><td>Ray / 2026-05-24 11:20</td><td>-</td><td>2026-06-10</td><td>-</td><td>FOB</td><td>55</td><td>88</td><td>上海港</td><td>待处理</td><td>-</td><td>$0.00</td><td>中国</td><td>-</td><td>Ray / 2026-05-25 10:00</td><td class="col-fixed-right"><div class="action-cell"><button type="button" class="action-link" data-action="确认发运单" data-code="FYD260528024188">确认发运单</button><button type="button" class="action-link" data-action="临时授信" data-code="FYD260528024188">临时授信</button><button type="button" class="action-link" data-action="日志" data-code="FYD260528024188">日志</button></div></td>
-      </tr>
-    
-      <tr data-code="FYD260528024120">
-        <td><input type="checkbox" class="row-check" data-code="FYD260528024120"></td>
-        <td><a class="link" data-detail="FYD260528024120">FYD260528024120</a><span class="copy" data-copy="FYD260528024120">⧉</span></td><td>客户ID：10000210595407<br>客户名称：FortyTwo Pte. Ltd.</td><td>林氏PI：L26050137017<br>客户PO：-<br>BPS订单：B26050137018</td><td><span class="status">发运异常</span></td><td><div class="money">实际总额：$4,500.00<br>调价总额：<a class="link" data-adjust="FYD260528024120">$0.00</a></div></td><td>商品数：45<br>包件数：70</td><td>25.110 m3</td><td>-</td><td>Ray / 2026-05-22 14:00</td><td>-</td><td>2026-06-11</td><td>-</td><td>FOB</td><td>45</td><td>70</td><td>上海港</td><td>待处理</td><td>-</td><td>$0.00</td><td>中国</td><td>-</td><td>Ray / 2026-05-22 16:00</td><td class="col-fixed-right"><div class="action-cell"><button type="button" class="action-link" data-action="确认发运单" data-code="FYD260528024120">确认发运单</button><button type="button" class="action-link" data-action="临时授信" data-code="FYD260528024120">临时授信</button><button type="button" class="action-link" data-action="日志" data-code="FYD260528024120">日志</button></div></td>
-      </tr>
-    
-      <tr data-code="FYD260528024100">
-        <td><input type="checkbox" class="row-check" data-code="FYD260528024100"></td>
-        <td><a class="link" data-detail="FYD260528024100">FYD260528024100</a><span class="copy" data-copy="FYD260528024100">⧉</span></td><td>客户ID：10000210595407<br>客户名称：FortyTwo Pte. Ltd.</td><td>林氏PI：L26050137019<br>客户PO：-<br>BPS订单：B26050137020</td><td><span class="status">已截货</span></td><td><div class="money">实际总额：$7,800.00<br>调价总额：<a class="link" data-adjust="FYD260528024100">$0.00</a></div></td><td>商品数：78<br>包件数：120</td><td>42.940 m3</td><td>-</td><td>Amy / 2026-05-21 11:00</td><td>-</td><td>2026-06-09</td><td>-</td><td>FOB</td><td>78</td><td>120</td><td>宁波港</td><td>待处理</td><td>-</td><td>$0.00</td><td>中国</td><td>-</td><td>Amy / 2026-05-21 15:00</td><td class="col-fixed-right"><div class="action-cell"><button type="button" class="action-link" data-action="确认发运单" data-code="FYD260528024100">确认发运单</button><button type="button" class="action-link" data-action="临时授信" data-code="FYD260528024100">临时授信</button><button type="button" class="action-link" data-action="日志" data-code="FYD260528024100">日志</button></div></td>
-      </tr>
-    </tbody>
-          </table>
-        </div>
-        <div class="pagination" id="paginationBar">
-          <span id="totalCount">共 15 条</span>
-          <span>10条/页</span>
-          <span id="pagePrev" class="page-no disabled">‹</span>
-          <span id="pageNumbers"><span class="page-no active">1</span><span class="page-no">2</span></span>
-          <span id="pageNext" class="page-no">›</span>
-          <span>前往</span>
-          <input id="pageInput" class="page-input" value="1">
-          <span>页</span>
-        </div>
-      </section>
-      </div>
-
-      <div class="page-view" id="customsManageView" hidden>
-        <section class="card search-card">
-          <div class="search-title">搜索筛选</div>
-          <div class="filter-layout">
-            <div class="quick-search">
-              <div class="filter-field">
-                <label>预报关单号</label>
-                <div class="field">
-                  <input id="customsSearchNo" placeholder="请输入预报关单号">
-                </div>
-              </div>
-              <div class="filter-field">
-                <label>发运单号</label>
-                <div class="field">
-                  <input id="customsSearchShipment" placeholder="请输入发运单号">
-                </div>
-              </div>
-              <div class="search-actions inline">
-                <button class="btn-action" type="button" onclick="renderCustomsManagePage()">查询</button>
-                <button class="btn-action btn-reset" type="button" onclick="resetCustomsSearch()">↻ 重置</button>
-              </div>
-            </div>
-          </div>
-        </section>
-        <section class="card">
-          <div class="table-wrap">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th>预报关单号</th>
-                  <th>报关单号</th>
-                  <th>发运单号</th>
-                  <th>客户名称</th>
-                  <th>报关金额</th>
-                  <th>报关单合同协议号</th>
-                  <th>状态</th>
-                </tr>
-              </thead>
-              <tbody id="customsTableBody"></tbody>
-            </table>
-          </div>
-        </section>
-      </div>
-    </main>
-  </div>
-
-  <div class="modal-mask" id="dialogMask">
-    <div class="dialog dialog-xl dialog-dispatch" id="dialogPanel">
-      <div class="dialog-header">
-        <strong id="dialogTitle">发运单详情—FYD260528024385（待装箱）</strong>
-        <button class="btn-default" onclick="closeDialog()">关闭</button>
-      </div>
-      <div class="dialog-body" id="dialogBody"><div class="dispatch-detail-page">
-        <div class="dispatch-basic-strip">
-          <span>客户名称：<strong>FortyTwo Pte. Ltd.</strong></span>
-          <span>总商品件数：<strong>266</strong></span>
-          <span>总包件数：<strong>448</strong></span>
-          <span>实际装柜日期：<strong>— —</strong></span>
-          <span>装船日期：<strong>— —</strong></span>
-          <span>开船日期：<strong>— —</strong></span>
-          <span>贸易国：<strong>中国</strong></span>
-          <span>抵运国：<strong>— —</strong></span>
-          <span>送货方式：<strong class="blue-link">送货到仓</strong></span>
-          <span>起运港：<strong>宁波港</strong></span>
-          <span>到达港：<strong>— —</strong></span>
-          <span>船司：<strong>— —</strong></span>
-          <span>ETA：<strong>— —</strong></span>
-          <span>海关编号：<strong>YBG2605280002</strong></span>
-          <span>阿里订单号：<strong>ALI260528001</strong></span>
-          <span>出口报关费（CNY）：<strong>— —</strong></span>
-          <span>运费补差价（CNY）：<strong>— —</strong></span>
-          <span>CI单&amp;PL装箱单：<strong>— —</strong></span>
-          <span>备注：<strong>— —</strong></span>
-          <span>接口信息：<strong>NBO：待同步；SCM：待回写</strong></span>
-        </div>
-        <div class="dispatch-top-actions">
-          <button class="dispatch-export-btn" type="button" onclick="exportPackageExcel(&#39;FYD260528024150&#39;)">导出装箱单</button>
-        </div>
-        <div class="dispatch-tabs">
-          <button class="dispatch-tab" type="button" data-dispatch-tab="cabinet">柜数据</button>
-          <button class="dispatch-tab active" type="button" data-dispatch-tab="goods">商品数据</button>
-        </div>
-        <div class="dispatch-panel" data-dispatch-panel="cabinet">
-          
-      <div class="detail-table-wrap dispatch-cabinet-grid">
-        <table class="detail-table">
-          <thead><tr>
-            <th>序号</th><th>预排柜号</th><th>柜型</th><th>装柜体积m<sup>3</sup> (计划/实际)</th>
-            <th>商品总件数 (计划/实际)</th><th>总包件数 (计划/实际)</th><th>总重量kg(计划/实际)</th>
-            <th>总金额（计划/实际）</th><th>BPS单号 <span class="copy" data-copy="B26020431021">⧉</span></th>
-            <th>批次单号 <span class="copy" data-copy="BATCH-001, BATCH-002">⧉</span></th><th>订舱号</th><th>实际柜号</th><th>封条号</th><th>车辆信息</th>
-          </tr></thead>
-          <tbody>
-            <tr>
-              <td>1</td>
-              <td>PC-260528-A</td>
-              <td>40HQ</td>
-              <td>147.990m<sup>3</sup>/147.990m<sup>3</sup></td>
-              <td>266/266</td>
-              <td>425/425</td>
-              <td>2329.90/2329.90</td>
-              <td>$23,895.00/$0.00</td>
-              <td>B26020431021</td>
-              <td>BATCH-001, BATCH-002</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-              <td>-</td>
-            </tr>
-          </tbody>
-          <tfoot>
-            <tr>
-              <td>合计:</td><td></td><td></td>
-              <td>147.990/147.990</td>
-              <td>266/266</td>
-              <td>425/425</td>
-              <td>2329.90/2329.90</td>
-              <td>23895.00/0.00</td>
-              <td></td><td></td><td></td><td></td><td></td><td></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-        </div>
-        <div class="dispatch-panel active" data-dispatch-panel="goods">
-          <div class="dispatch-search-row">
-            <select id="detailGoodsField">
-              <option value="skuNo">SKU</option>
-              <option value="contractBillcode">BPS订单</option>
-              <option value="contractNbillcode">林氏PI 单号</option>
-              <option value="goodsSpec1">客户PO单号</option>
-              <option value="spuNo">SPU</option>
-              <option value="batchNo">批次单号</option>
-            </select>
-            <input id="detailGoodsKeyword" value="" placeholder="批量查询用英文逗号/空格隔开">
-            <button id="detailGoodsSearchBtn" type="button">查询</button>
-          </div>
-          <div id="detailGoodsTable">
-      <div class="detail-table-wrap dispatch-goods-grid">
-        <table class="detail-table">
-          <thead><tr>
-            <th>序号</th><th>BPS订单</th><th>SKU</th><th>林氏PI 单号</th><th>客户PO单号</th><th>SPU</th><th>规格描述</th>
-            <th>单位体积</th><th>单位包件</th><th>单价</th><th>装箱数量（计划/实际）</th>
-            <th>装箱体积（计划/实际）</th><th>装箱件数（计划/实际）</th><th>装箱毛重（计划/实际）</th>
-            <th>装箱金额（计划/实际）</th><th>退单数量</th><th>退单金额</th><th>退款金额</th>
-            <th>发货仓库</th><th>进仓编号1</th><th>进仓编号2</th>
-            <th>编码（客户）</th><th>规格（客户）</th><th>材质（客户）</th><th>批次单号</th>
-            <th>财审状态</th><th>标签颜色</th><th>单位毛重</th><th>林氏类目</th><th>报关类目</th><th>报关单位</th>
-            <th>预排柜号</th><th>柜型</th><th>实际柜号</th><th>封条号</th>
-          </tr></thead>
-          <tbody>
-        <tr>
-          <td>1</td>
-          <td>B26020431021</td>
-          <td>LS-SF-001</td>
-          <td>L26020431009</td>
-          <td>Customized-0112</td>
-          <td>SPU-BED-18</td>
-          <td>实木床 1.8m</td>
-          <td>0.850m<sup>3</sup></td>
-          <td>2</td>
-          <td>$120.00</td>
-          <td>159/159</td>
-          <td>135.150m<sup>3</sup> / 135.150m<sup>3</sup></td>
-          <td>318/318</td>
-          <td>1987.50/1987.50</td>
-          <td>$19,080.00 / $19,080.00</td>
-          <td>0</td>
-          <td>$0.00</td>
-          <td>$0.00</td>
-          <td>佛山仓</td>
-          <td>IN-A001</td>
-          <td>BIN-01</td>
-          <td>CUST-001</td>
-          <td>1800*2000</td>
-          <td>橡木</td>
-          <td>BATCH-001</td>
-          <td>财审通过</td>
-          <td>绿标</td>
-          <td>12.50</td>
-          <td>卧室家具</td>
-          <td>木制床</td>
-          <td>件</td>
-          <td>PC-260528-A</td>
-          <td>40HQ</td>
-          <td>-</td>
-          <td>-</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>B26020431021</td>
-          <td>LS-SF-002</td>
-          <td>L26020431009</td>
-          <td>Customized-0112</td>
-          <td>SPU-NST-50</td>
-          <td>床头柜</td>
-          <td>0.120m<sup>3</sup></td>
-          <td>1</td>
-          <td>$45.00</td>
-          <td>107/107</td>
-          <td>12.840m<sup>3</sup> / 12.840m<sup>3</sup></td>
-          <td>107/107</td>
-          <td>342.40/342.40</td>
-          <td>$4,815.00 / $4,815.00</td>
-          <td>0</td>
-          <td>$0.00</td>
-          <td>$0.00</td>
-          <td>佛山仓</td>
-          <td>IN-A001</td>
-          <td>BIN-01</td>
-          <td>CUST-002</td>
-          <td>500*400</td>
-          <td>橡木</td>
-          <td>BATCH-002</td>
-          <td>财审通过</td>
-          <td>绿标</td>
-          <td>3.20</td>
-          <td>卧室家具</td>
-          <td>木制柜</td>
-          <td>件</td>
-          <td>PC-260528-A</td>
-          <td>40HQ</td>
-          <td>-</td>
-          <td>-</td>
-        </tr></tbody>
-          <tfoot>
-            <tr>
-              <td>合计:</td><td></td><td></td>
-              <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-              <td>266/266</td>
-              <td>147.990/147.990</td>
-              <td>425/425</td>
-              <td>2329.90/2329.90</td>
-              <td>23895.00/23895.00</td>
-              <td>0</td>
-              <td>0.00</td>
-              <td>0.00</td>
-              <td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-              <td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div></div>
-        </div>
-       </div></div>
-      <div class="dialog-footer" id="dialogFooter"><span></span></div>
-    </div>
-  </div>
-
-  <div class="modal-mask confirm-sub-mask" id="confirmImportMask">
-    <div class="confirm-sub-modal confirm-import-modal dialog">
-      <div class="dialog-header">
-        <strong>导入发运数据</strong>
-        <button class="btn-default" type="button" onclick="closeConfirmImportModal()">关闭</button>
-      </div>
-      <div class="dialog-body">
-        <div class="confirm-import-actions">
-          <button class="btn-action" type="button" onclick="showToast('请选择 .xls / .xlsx 文件')">点击上传</button>
-          <button class="confirm-import-link" type="button" onclick="showToast('已下载发运数据模板')">下载模板</button>
-        </div>
-        <div class="confirm-import-notes">
-          <strong>注意事项：</strong>
-          <p>1、支持拓展名：.xls、.xlsx 格式的文件</p>
-          <p>2、请按系统模板格式导入，勿随意更改模板字段</p>
-        </div>
-      </div>
-      <div class="dialog-footer">
-        <button class="btn-default" type="button" onclick="closeConfirmImportModal()">取消</button>
-        <button class="btn-action" type="button" onclick="mockConfirmImport()">确认导入</button>
       </div>
     </div>
   </div>
 
-  <div class="modal-mask confirm-sub-mask" id="confirmUnarrangedMask">
-    <div class="confirm-sub-modal dialog">
-      <div class="dialog-header">
-        <strong>未排入商品选择界面</strong>
-        <button class="modal-close-x" type="button" onclick="closeConfirmUnarrangedModal()" aria-label="关闭">×</button>
+  <div class="overlay" id="overlayPicker">
+    <div class="sheet sheet-picker" onclick="event.stopPropagation()">
+      <div class="sheet-header">
+        <h3>Parameter</h3>
+        <button class="sheet-close" data-close="picker">×</button>
       </div>
-      <div class="dialog-body">
-        <div class="confirm-unarranged-toolbar">
-          <div class="confirm-unarranged-search-col">
-            <div class="confirm-input-group">
-              <span class="confirm-input-label">商品编码</span>
-              <input id="confirmUnarrangedGoodsCode" placeholder="请输入" />
-            </div>
-            <button class="confirm-unarranged-search-btn" type="button" onclick="searchConfirmUnarranged()">搜索</button>
-          </div>
-          <div class="confirm-input-group">
-            <span class="confirm-input-label">BPS订单号</span>
-            <input id="confirmUnarrangedBps" placeholder="请输入" />
-          </div>
-          <div class="confirm-input-group">
-            <span class="confirm-input-label">SKU</span>
-            <input id="confirmUnarrangedSku" placeholder="英文逗号批量查询" />
+      <div class="picker-preview">
+        <img id="pickerThumb" src="" alt="" />
+        <div class="picker-preview-info">
+          <h4 id="pickerTitle"></h4>
+          <div class="picker-price" id="pickerPrice"></div>
+          <div class="picker-moq" id="pickerMoq"></div>
+        </div>
+      </div>
+      <div class="sale-tabs" id="saleTabs">
+        <button class="sale-tab active" data-sale="stock">Stock</button>
+        <button class="sale-tab" data-sale="custom">Custom</button>
+      </div>
+      <div class="sheet-body" id="pickerBody"></div>
+      <div class="sheet-footer">
+        <div class="footer-summary">
+          <label class="footer-check">
+            <input type="checkbox" id="checkAll" />
+            <span>All</span>
+          </label>
+          <div class="footer-total">Total: <strong id="footerTotal">$0.00</strong></div>
+          <div class="footer-selected" id="openSelected">
+            Selected: <strong id="footerSelected">0 Items, 0 Pcs</strong>
+            <span>▾</span>
           </div>
         </div>
-        <div class="confirm-unarranged-foot">
-          <div class="confirm-selector-stats">
-            <span>已勾选总数量：<strong id="confirmUnarrangedQty">0</strong></span>
-            <span>总方数：<strong id="confirmUnarrangedVolume">0.000</strong></span>
-            <span>剩余未排商品数：614</span>
-            <span>剩余未排方数：375.598</span>
-          </div>
-          <div class="confirm-unarranged-actions">
-            <button class="confirm-unarranged-btn-exit" type="button" onclick="closeConfirmUnarrangedModal()">退出</button>
-            <button class="confirm-unarranged-btn-select" type="button" onclick="insertConfirmUnarranged()">选入</button>
+        <div class="footer-actions">
+          <button class="btn-wishlist" id="btnAddWishlist">+ add to wishlist</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlaySelected">
+    <div class="sheet sheet-picker" onclick="event.stopPropagation()">
+      <div class="sheet-header">
+        <button class="sheet-clear" id="btnClear">Clear</button>
+        <h3 id="selectedTitle">Selected 0 Pcs</h3>
+        <button class="sheet-close" data-close="selected">×</button>
+      </div>
+      <div class="sheet-body" id="selectedBody"></div>
+      <div class="sheet-footer">
+        <div class="footer-summary">
+          <label class="footer-check">
+            <input type="checkbox" id="checkAll2" />
+            <span>All</span>
+          </label>
+          <div class="footer-total">Total: <strong id="footerTotal2">$0.00</strong></div>
+          <div class="footer-selected" id="closeSelected">
+            Selected: <strong id="footerSelected2">0 Items, 0 Pcs</strong>
+            <span>▴</span>
           </div>
         </div>
-        <div class="confirm-modal-table-wrap">
-          <table class="confirm-modal-table">
-            <thead>
-              <tr>
-                <th style="width:36px"><input type="checkbox" id="confirmUnarrangedCheckAll" /></th>
-                <th>BPS单号</th>
-                <th>进仓编号</th>
-                <th>商品编码</th>
-                <th>商品型号</th>
-                <th>商品规格</th>
-                <th>单位立方数</th>
-                <th>预计交期</th>
-                <th>未排数量</th>
-                <th>未排方数</th>
-              </tr>
-            </thead>
-            <tbody id="confirmUnarrangedBody">
-              <tr><td><input type="checkbox" class="confirm-unarranged-check" data-qty="8" data-cbm="0.576" /></td><td>B2606010032</td><td></td><td>LSC23DD009848</td><td>UV3E</td><td>规格：三斗柜 颜色：原木色+花粉白</td><td>0.072</td><td>35天</td><td>8</td><td>0.576</td></tr>
-              <tr><td><input type="checkbox" class="confirm-unarranged-check" data-qty="6" data-cbm="1.716" /></td><td>B2605310041</td><td></td><td>LSC24YG030454</td><td>TR20</td><td>规格：2.0m两门衣柜 颜色：白色</td><td>0.286</td><td>7天</td><td>6</td><td>1.716</td></tr>
-              <tr><td><input type="checkbox" class="confirm-unarranged-check" data-qty="3" data-cbm="1.485" /></td><td>B2605310031</td><td></td><td>LSC23SF009024</td><td>TB5039</td><td>规格：单人位颜色：米白色</td><td>0.495</td><td>7天</td><td>3</td><td>1.485</td></tr>
-              <tr><td><input type="checkbox" class="confirm-unarranged-check" data-qty="12" data-cbm="0.588" /></td><td>B2605310025</td><td></td><td>LS02XGLS4N006</td><td>JS4N</td><td>0.8米梳妆柜</td><td>0.049</td><td>7天</td><td>12</td><td>0.588</td></tr>
-              <tr><td><input type="checkbox" class="confirm-unarranged-check" data-qty="5" data-cbm="0.955" /></td><td>B2605250015</td><td></td><td>LSC25XZ073241</td><td>LS690V5</td><td>规格：1.2m儿童学习桌 颜色：白色</td><td>0.191</td><td>40天</td><td>5</td><td>0.955</td></tr>
-            </tbody>
-          </table>
+        <div class="footer-actions">
+          <button class="btn-wishlist" id="btnAddWishlist2">+ add to wishlist</button>
         </div>
       </div>
     </div>
@@ -3584,8 +618,617 @@
 
   <div class="toast" id="toast"></div>
 
-  <script src="./demo-app.js"></script>
+  <script>
+  (() => {
+    const IMAGES = [
+      'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=960&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=960&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1617806117938-529d34949e8f?w=960&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=960&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=960&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=960&h=800&fit=crop',
+      'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=960&h=800&fit=crop',
+    ];
 
+    const PRODUCT = {
+      title: 'Purus Wood Color + White Dining Chair',
+      item: 'LS00757-LS022H200757F',
+      status: 'Active',
+      tag: 'Bestsellers',
+      price: 78.56,
+      moq: 5,
+      customMoq: 50,
+      stock: 1000,
+      installTime: '45 minutes',
+      deliveryDate: '7 days',
+      dim: '1620mm(L)*310mm(W)*310mm(H)',
+      cbm: '0.155m³',
+      gw: '20.3kg',
+      style: 'Nordic Style',
+      series: 'Series OU-A',
+      model: 'OU2R',
+      lifestyleGallery: IMAGES.slice(2, 6),
+      gallery: IMAGES.slice(0, 7),
+      attributes: [
+        ['Brand', 'LINSY'],
+        ['Cat.', 'Sofa Beds'],
+        ['For', 'Living Room'],
+        ['Plug Spec', '--'],
+        ['Coll.', 'Sofa bed collection'],
+        ['Item', 'LSC25SF047688'],
+        ['Electric', 'NO'],
+        ['Volt', '--'],
+        ['Style', 'LINSY'],
+        ['Model', 'G064'],
+        ['Disc.', 'On Sale'],
+        ['Volt. Freq.', '--'],
+        ['Series', 'Nolara'],
+        ['Goods Type', '--'],
+        ['Elec. Type', '--'],
+        ['Output Volt.', '--'],
+      ],
+      colors: [
+        { id: 'c1', label: 'Wood Color + Light Grey', img: IMAGES[0], badge: 5 },
+        { id: 'c2', label: 'Vintage + Black', img: IMAGES[1] },
+        { id: 'c3', label: 'Vintage + Green', img: IMAGES[3] },
+        { id: 'c4', label: 'Other', img: IMAGES[5] },
+      ],
+      sizes: ['2.37m', '2.72m', '3.02m'],
+      skus: [
+        { id: 's1', name: 'Oak', colorId: 'c2', sizeIdx: 1, stock: 1000, moq: 5, price: 78.56, disco: false, soldOut: false },
+        { id: 's2', name: 'Black Walnut', colorId: 'c2', sizeIdx: 1, stock: 10, moq: 5, price: 78.56, disco: true, soldOut: false },
+        { id: 's3', name: 'Wooden', colorId: 'c2', sizeIdx: 1, stock: 0, moq: 5, price: 78.56, disco: false, soldOut: true },
+        { id: 's4', name: 'LS-C001-BK-180', colorId: 'c1', sizeIdx: 1, stock: 1000, moq: 5, price: 78.56, disco: false, soldOut: false },
+        { id: 's5', name: 'LS-C001-BK-181', colorId: 'c1', sizeIdx: 1, stock: 10, moq: 5, price: 78.56, disco: true, soldOut: false },
+        { id: 's6', name: 'LS-C001-BK-182', colorId: 'c1', sizeIdx: 1, stock: 0, moq: 5, price: 78.56, disco: false, soldOut: true },
+        { id: 's7', name: 'LS-C001-BK-185', colorId: 'c1', sizeIdx: 1, stock: 1000, moq: 5, price: 78.56, disco: false, soldOut: false },
+      ],
+      otherSkus: [
+        { id: 'o1', name: 'LS-C001-BK-180', stock: 1000, moq: 5, price: 78.56, disco: false, soldOut: false },
+        { id: 'o2', name: 'LS-C001-BK-181', stock: 10, moq: 5, price: 78.56, disco: true, soldOut: false },
+        { id: 'o3', name: 'LS-C001-BK-182', stock: 0, moq: 5, price: 78.56, disco: false, soldOut: true },
+        { id: 'o4', name: 'LS-C001-BK-185', stock: 1000, moq: 5, price: 78.56, disco: false, soldOut: false },
+      ],
+      description: {
+        overview: 'Plywood, Foam, PU Cotton, 12-Proof Cat Fabric',
+        points: [
+          '12-Layer Cat-Proof Fabric',
+          'Plush Full Body Comfort',
+          'Stable Carbon Steel Frame',
+          '3-Level Recline & Relax',
+          '5-Second Sofa-to-Bed',
+          'Zoned Easy-Wash Design',
+        ],
+      },
+    };
 
+    const RECOMMEND = Array.from({ length: 4 }, (_, i) => ({
+      id: `rec${i}`,
+      title: 'Oxygen Wood Grain Sintered s...',
+      item: `LSC25ZH07589${i + 2}`,
+      price: 78.56 + i * 12,
+      estDel: '7d',
+      moq: 5,
+      img: IMAGES[i % IMAGES.length],
+      thumbs: IMAGES.slice(i, i + 3),
+      moreCount: 12,
+    }));
 
-</body></html>
+    const state = {
+      imageIndex: 0,
+      storySlide: 0,
+      tab: 'description',
+      recTab: 'series',
+      recFavs: {},
+      favorited: false,
+      saleType: 'stock',
+      colorId: 'c1',
+      sizeIdx: 1,
+      qtyMap: { s1: 5, s2: 0, s3: 0, s4: 7, o1: 5, o2: 0, o3: 0, o4: 7 },
+      overlay: null,
+    };
+
+    function fmtTotal(v) {
+      return '$' + v.toFixed(2);
+    }
+
+    function colorLabel(id) {
+      return (PRODUCT.colors.find(c => c.id === id) || {}).label || '';
+    }
+
+    function getActiveSkus() {
+      return state.saleType === 'stock'
+        ? PRODUCT.skus.filter(s => s.colorId === state.colorId && s.sizeIdx === state.sizeIdx)
+        : PRODUCT.otherSkus;
+    }
+
+    function getSelectedItems() {
+      const skus = [...PRODUCT.skus, ...PRODUCT.otherSkus.map(o => ({ ...o, colorId: 'c1', sizeIdx: 1 }))];
+      return skus.filter(s => (state.qtyMap[s.id] || 0) > 0).map(s => ({
+        ...s,
+        qty: state.qtyMap[s.id],
+        desc: s.colorId
+          ? `${colorLabel(s.colorId)}; ${PRODUCT.sizes[s.sizeIdx]}; ${s.name}`
+          : s.name,
+      }));
+    }
+
+    function getSummary() {
+      const items = getSelectedItems();
+      const pcs = items.reduce((sum, i) => sum + i.qty, 0);
+      const total = items.reduce((sum, i) => sum + i.qty * i.price, 0);
+      return { itemCount: items.length, pcs, total };
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 1800);
+    }
+
+    function fmtPrice(v) {
+      const [int, dec] = v.toFixed(2).split('.');
+      return `<span class="currency">$ </span><span class="amount">${int}.${dec}</span><span class="unit"> USD</span>`;
+    }
+
+    function fmtRecPrice(v) {
+      const [int, dec] = v.toFixed(2).split('.');
+      return `<span class="currency">$ </span><span class="amount">${int}.${dec}</span><span class="unit"> USD</span>`;
+    }
+
+    function openOverlay(name) {
+      state.overlay = name;
+      document.getElementById('overlayParam').classList.toggle('open', name === 'param');
+      document.getElementById('overlayPicker').classList.toggle('open', name === 'picker');
+      document.getElementById('overlaySelected').classList.toggle('open', name === 'selected');
+      if (name === 'param') renderParam();
+      if (name === 'picker') renderPicker();
+      if (name === 'selected') renderSelected();
+    }
+
+    function closeOverlay() {
+      state.overlay = null;
+      document.querySelectorAll('.overlay').forEach(el => el.classList.remove('open'));
+    }
+
+    function renderMain() {
+      document.getElementById('app').innerHTML = `
+        <div class="status-bar">
+          <span>9:41</span>
+          <span class="status-icons">▮▮▮ WiFi 🔋</span>
+        </div>
+        <header class="nav-bar">
+          <button class="nav-btn">‹</button>
+          <div class="nav-title">Product Details</div>
+          <div class="nav-right">
+            <div class="nav-pill"><span>···</span><span>⊙</span></div>
+          </div>
+        </header>
+
+        <div class="gallery-wrap">
+          <div class="gallery-main">
+            <img src="${PRODUCT.gallery[state.imageIndex]}" alt="${PRODUCT.title}" />
+            <div class="thumb-strip">
+              ${PRODUCT.gallery.map((src, i) => `
+                <button class="thumb ${state.imageIndex === i ? 'active' : ''}" data-thumb="${i}">
+                  <img src="${src}" alt="" />
+                </button>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="info-block">
+          <h1 class="product-title">${PRODUCT.title}</h1>
+          <div class="meta-row">
+            <span>Item : ${PRODUCT.item}</span>
+            <span>|</span>
+            <span>Status: ${PRODUCT.status}</span>
+          </div>
+          <span class="badge">${PRODUCT.tag}</span>
+          <div class="price-row">
+            <div class="price-main">${fmtPrice(PRODUCT.price)}</div>
+            <div class="price-meta">MOQ: ${PRODUCT.moq} pcs | Stock: ${PRODUCT.stock} pcs</div>
+          </div>
+
+          <div class="spec-list">
+            <div class="spec-item">
+              <svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <span>Estimated Installation Time: <strong>${PRODUCT.installTime}</strong></span>
+            </div>
+            <div class="spec-item">
+              <svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              <span>Delivery Date: <strong>${PRODUCT.deliveryDate}</strong></span>
+            </div>
+            <div class="spec-item">
+              <svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+              <span>DIM: <strong>${PRODUCT.dim}</strong></span>
+            </div>
+            <div class="spec-item">
+              <svg class="spec-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+              <span>CBM / G.W: <strong>${PRODUCT.cbm} / ${PRODUCT.gw}</strong></span>
+            </div>
+          </div>
+
+          <div class="attr-grid-row" data-open-param>
+            <div class="attr-col">
+              <div class="attr-val"><span class="attr-dot"></span>${PRODUCT.style}</div>
+              <div class="attr-lbl">Style</div>
+            </div>
+            <div class="attr-col">
+              <div class="attr-val">${PRODUCT.series}</div>
+              <div class="attr-lbl">Series</div>
+            </div>
+            <div class="attr-col">
+              <div class="attr-val">${PRODUCT.model}</div>
+              <div class="attr-lbl">Model No.</div>
+            </div>
+            <span class="chev">›</span>
+          </div>
+        </div>
+
+        <div class="tabs-wrap">
+          <div class="tabs">
+            ${['description', 'sizeChart', 'material', 'installation', 'recommend'].map(t => `
+              <button class="tab ${state.tab === t ? 'active' : ''}" data-tab="${t}">
+                ${t === 'sizeChart' ? 'Size Chart' : t.charAt(0).toUpperCase() + t.slice(1)}
+              </button>
+            `).join('')}
+          </div>
+          <div class="tab-panel">${renderTabPanel()}</div>
+        </div>
+
+        <footer class="bottom-bar">
+          <button class="bar-icon ${state.favorited ? 'active' : ''}" id="btnFav">
+            <span class="ico">♡</span>
+            <span>Fav</span>
+          </button>
+          <button class="btn-wishlist" id="btnOpenPicker">+ add to wishlist</button>
+        </footer>
+      `;
+      bindMain();
+    }
+
+    function renderStoryCarousel() {
+      const imgs = PRODUCT.lifestyleGallery || PRODUCT.gallery.slice(2, 6);
+      const idx = state.storySlide % imgs.length;
+      return `
+        <div class="story-carousel">
+          <img src="${imgs[idx]}" alt="lifestyle" />
+          <button class="carousel-nav prev" data-story="prev">‹</button>
+          <button class="carousel-nav next" data-story="next">›</button>
+          <div class="carousel-dots">
+            ${imgs.map((_, i) => `<button class="carousel-dot ${idx === i ? 'on' : ''}" data-story-dot="${i}"></button>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRecCard(r) {
+      const favOn = !!state.recFavs[r.id];
+      return `
+        <article class="rec-card">
+          <div class="rec-img-wrap">
+            <img src="${r.img}" alt="" />
+            <div class="rec-thumbs-overlay">
+              ${r.thumbs.map(t => `<span><img src="${t}" alt="" /></span>`).join('')}
+              <span class="rec-more">+${r.moreCount}</span>
+            </div>
+          </div>
+          <div class="rec-title-row">
+            <div class="rec-name">${r.title}</div>
+            <button class="rec-fav ${favOn ? 'on' : ''}" data-rec-fav="${r.id}" aria-label="Favorite">${favOn ? '♥' : '♡'}</button>
+          </div>
+          <div class="rec-price">${fmtRecPrice(r.price)}</div>
+          <div class="rec-item">Item : ${r.item}</div>
+          <div class="rec-shipping">
+            <span>Est. Del: ${r.estDel}</span>
+            <span>MOQ: ${r.moq} pcs</span>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderRecommendGrid() {
+      return `
+        <div class="rec-tabs">
+          <button class="rec-tab ${state.recTab === 'series' ? 'active' : ''}" data-rec="series">Same Series</button>
+          <button class="rec-tab ${state.recTab === 'category' ? 'active' : ''}" data-rec="category">Same Category</button>
+        </div>
+        <div class="rec-grid">
+          ${RECOMMEND.map(r => renderRecCard(r)).join('')}
+        </div>
+      `;
+    }
+
+    function renderTabPanel() {
+      if (state.tab === 'description') {
+        return `
+          <h4>Overview</h4>
+          <p>${PRODUCT.description.overview}</p>
+          <h4>Product Selling Points</h4>
+          <ul>${PRODUCT.description.points.map(p => `<li>${p}</li>`).join('')}</ul>
+          ${renderStoryCarousel()}
+          <div class="rec-section">${renderRecommendGrid()}</div>
+        `;
+      }
+      if (state.tab === 'sizeChart') {
+        return `<h4>Size Chart</h4><p>DIM: ${PRODUCT.dim} · CBM: ${PRODUCT.cbm} · G.W.: ${PRODUCT.gw}</p><img class="story-img" src="${PRODUCT.gallery[2]}" alt="size" />`;
+      }
+      if (state.tab === 'material') {
+        return `<h4>Material</h4><p>${PRODUCT.description.overview}. Structured material info for export compliance.</p><img class="story-img" src="${PRODUCT.gallery[3]}" alt="material" />`;
+      }
+      if (state.tab === 'installation') {
+        return `<h4>Installation</h4><ul><li>Estimated time: ${PRODUCT.installTime}</li><li>Unpack and verify all parts.</li><li>Follow assembly guide included in package.</li></ul>`;
+      }
+      if (state.tab === 'recommend') {
+        return renderRecommendGrid();
+      }
+      return '';
+    }
+
+    function renderParam() {
+      document.getElementById('paramBody').innerHTML = PRODUCT.attributes.map(([label, value]) => `
+        <div class="param-row">
+          <span class="label">${label}</span>
+          <span class="value">${value}</span>
+        </div>
+      `).join('');
+    }
+
+    function renderPicker() {
+      const moq = state.saleType === 'custom' ? PRODUCT.customMoq : PRODUCT.moq;
+      document.getElementById('pickerThumb').src = PRODUCT.gallery[0];
+      document.getElementById('pickerTitle').textContent = PRODUCT.title;
+      document.getElementById('pickerPrice').innerHTML = fmtPrice(PRODUCT.price);
+      document.getElementById('pickerMoq').textContent = `MOQ: ${moq} pcs`;
+
+      document.querySelectorAll('.sale-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.sale === state.saleType);
+      });
+
+      const activeSkus = getActiveSkus();
+      const isOtherMode = state.saleType === 'custom';
+
+      document.getElementById('pickerBody').innerHTML = isOtherMode ? `
+        <div class="picker-section">
+          <label>Other Attr</label>
+          ${activeSkus.map(s => renderSkuRow(s)).join('')}
+        </div>
+      ` : `
+        <div class="picker-section">
+          <label>Color</label>
+          <div class="color-options">
+            ${PRODUCT.colors.map(c => `
+              <div class="color-opt ${state.colorId === c.id ? 'active' : ''}" data-color="${c.id}">
+                ${c.badge ? `<span class="color-badge">${c.badge}</span>` : ''}
+                <img src="${c.img}" alt="" />
+                <span>${c.label}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+        <div class="picker-section">
+          <label>Size</label>
+          <div class="size-options">
+            ${PRODUCT.sizes.map((sz, i) => `
+              <button class="size-opt ${state.sizeIdx === i ? 'active' : ''}" data-size="${i}">${sz}</button>
+            `).join('')}
+          </div>
+        </div>
+        <div class="picker-section">
+          <label>Material</label>
+          ${activeSkus.map(s => renderSkuRow(s)).join('')}
+        </div>
+      `;
+
+      updateFooter();
+      bindPicker();
+    }
+
+    function renderSkuRow(s) {
+      const qty = state.qtyMap[s.id] || 0;
+      const selected = qty > 0;
+      if (s.soldOut) {
+        return `
+          <div class="sku-row">
+            <div class="sku-info">
+              <div class="sku-name">${s.name}</div>
+              <div class="sku-stock">Stock: 0 pcs</div>
+            </div>
+            <span class="sold-out">Sold Out</span>
+          </div>
+        `;
+      }
+      return `
+        <div class="sku-row ${selected ? 'selected' : ''}" data-sku="${s.id}">
+          <div class="sku-info">
+            <div class="sku-name">
+              ${s.name}
+              ${s.disco ? '<span class="tag-disco">Disco</span>' : ''}
+            </div>
+            <div class="sku-stock">Stock: ${s.stock.toLocaleString()} pcs</div>
+          </div>
+          <div class="stepper">
+            <button data-step="${s.id}" data-delta="-1" ${qty <= 0 ? 'disabled' : ''}>−</button>
+            <input value="${qty}" data-qty-input="${s.id}" readonly />
+            <button data-step="${s.id}" data-delta="1">+</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSelected() {
+      const items = getSelectedItems();
+      const { pcs, total, itemCount } = getSummary();
+      document.getElementById('selectedTitle').textContent = `Selected ${pcs} Pcs`;
+      document.getElementById('selectedBody').innerHTML = items.length ? items.map(item => `
+        <div class="selected-item">
+          <img src="${PRODUCT.gallery[0]}" alt="" />
+          <div class="selected-info">
+            <div class="selected-desc">${item.desc}</div>
+            <div class="selected-price">${fmtPrice(item.price)}</div>
+            <div class="selected-stock">Stock: ${item.stock.toLocaleString()} pcs</div>
+          </div>
+          <div class="stepper">
+            <button data-step="${item.id}" data-delta="-1" ${item.qty <= 0 ? 'disabled' : ''}>−</button>
+            <input value="${item.qty}" readonly />
+            <button data-step="${item.id}" data-delta="1">+</button>
+          </div>
+        </div>
+      `).join('') : '<p style="padding:20px;text-align:center;color:#8a959c">No items selected</p>';
+
+      document.getElementById('footerTotal2').textContent = fmtTotal(total);
+      document.getElementById('footerSelected2').textContent = `${itemCount} Items, ${pcs} Pcs`;
+      document.getElementById('checkAll2').checked = itemCount > 0;
+
+      document.querySelectorAll('#selectedBody [data-step]').forEach(btn => {
+        btn.onclick = () => changeQty(btn.dataset.step, Number(btn.dataset.delta));
+      });
+    }
+
+    function updateFooter() {
+      const { pcs, total, itemCount } = getSummary();
+      document.getElementById('footerTotal').textContent = fmtTotal(total);
+      document.getElementById('footerSelected').innerHTML = `${itemCount} Items, ${pcs} Pcs`;
+      document.getElementById('checkAll').checked = itemCount > 0;
+      if (document.getElementById('footerTotal2')) {
+        document.getElementById('footerTotal2').textContent = fmtTotal(total);
+        document.getElementById('footerSelected2').textContent = `${itemCount} Items, ${pcs} Pcs`;
+      }
+    }
+
+    function changeQty(skuId, delta) {
+      const allSkus = [...PRODUCT.skus, ...PRODUCT.otherSkus];
+      const sku = allSkus.find(s => s.id === skuId);
+      if (!sku || sku.soldOut) return;
+      const moq = state.saleType === 'custom' ? PRODUCT.customMoq : (sku.moq || PRODUCT.moq);
+      let next = (state.qtyMap[skuId] || 0) + delta;
+      if (next < 0) next = 0;
+      if (next > 0 && next < moq) next = delta > 0 ? moq : 0;
+      if (next > sku.stock) {
+        showToast(`Max stock: ${sku.stock} pcs`);
+        next = sku.stock;
+      }
+      state.qtyMap[skuId] = next;
+      if (state.overlay === 'picker') renderPicker();
+      else if (state.overlay === 'selected') { renderSelected(); updateFooter(); }
+      else updateFooter();
+    }
+
+    function submitWishlist() {
+      const { pcs } = getSummary();
+      if (pcs <= 0) {
+        showToast('Please select quantity');
+        return;
+      }
+      showToast(`Added ${pcs} pcs to wishlist`);
+      closeOverlay();
+    }
+
+    function bindPicker() {
+      document.querySelectorAll('#pickerBody [data-color]').forEach(el => {
+        el.onclick = () => { state.colorId = el.dataset.color; renderPicker(); };
+      });
+      document.querySelectorAll('#pickerBody [data-size]').forEach(btn => {
+        btn.onclick = () => { state.sizeIdx = Number(btn.dataset.size); renderPicker(); };
+      });
+      document.querySelectorAll('#pickerBody [data-step]').forEach(btn => {
+        btn.onclick = () => changeQty(btn.dataset.step, Number(btn.dataset.delta));
+      });
+      document.querySelectorAll('#saleTabs .sale-tab').forEach(btn => {
+        btn.onclick = () => { state.saleType = btn.dataset.sale; renderPicker(); };
+      });
+    }
+
+    function bindMain() {
+      document.querySelectorAll('[data-thumb]').forEach(btn => {
+        btn.onclick = () => { state.imageIndex = Number(btn.dataset.thumb); renderMain(); };
+      });
+      document.querySelectorAll('[data-tab]').forEach(btn => {
+        btn.onclick = () => { state.tab = btn.dataset.tab; renderMain(); };
+      });
+      document.querySelectorAll('[data-rec]').forEach(btn => {
+        btn.onclick = () => { state.recTab = btn.dataset.rec; renderMain(); };
+      });
+      document.querySelectorAll('[data-rec-fav]').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.recFav;
+          state.recFavs[id] = !state.recFavs[id];
+          renderMain();
+        };
+      });
+      document.querySelectorAll('[data-story]').forEach(btn => {
+        btn.onclick = () => {
+          const imgs = PRODUCT.lifestyleGallery || PRODUCT.gallery.slice(2, 6);
+          if (btn.dataset.story === 'prev') {
+            state.storySlide = (state.storySlide - 1 + imgs.length) % imgs.length;
+          } else {
+            state.storySlide = (state.storySlide + 1) % imgs.length;
+          }
+          renderMain();
+        };
+      });
+      document.querySelectorAll('[data-story-dot]').forEach(btn => {
+        btn.onclick = () => {
+          state.storySlide = Number(btn.dataset.storyDot);
+          renderMain();
+        };
+      });
+      document.getElementById('btnFav').onclick = () => {
+        state.favorited = !state.favorited;
+        renderMain();
+      };
+      document.getElementById('btnOpenPicker').onclick = () => openOverlay('picker');
+      const paramBtn = document.querySelector('[data-open-param]');
+      if (paramBtn) paramBtn.onclick = () => openOverlay('param');
+    }
+
+    function bindOverlays() {
+      document.querySelectorAll('[data-close]').forEach(btn => {
+        btn.onclick = () => closeOverlay();
+      });
+      document.querySelectorAll('.overlay').forEach(overlay => {
+        overlay.onclick = (e) => { if (e.target === overlay) closeOverlay(); };
+      });
+      document.querySelectorAll('[data-open-picker]').forEach(btn => {
+        btn.onclick = () => {
+          closeOverlay();
+          setTimeout(() => openOverlay('picker'), 200);
+        };
+      });
+      document.getElementById('openSelected').onclick = () => openOverlay('selected');
+      document.getElementById('closeSelected').onclick = () => openOverlay('picker');
+      document.getElementById('btnAddWishlist').onclick = submitWishlist;
+      document.getElementById('btnAddWishlist2').onclick = submitWishlist;
+      document.getElementById('btnClear').onclick = () => {
+        Object.keys(state.qtyMap).forEach(k => { state.qtyMap[k] = 0; });
+        renderSelected();
+        updateFooter();
+      };
+    }
+
+    function init() {
+      try {
+        bindOverlays();
+        renderMain();
+      } catch (err) {
+        console.error(err);
+        const app = document.getElementById('app');
+        if (app) {
+          app.innerHTML = '<p style="padding:24px;color:#d64545;text-align:center">Demo failed to load. Please check index.html is uploaded completely.</p>';
+        }
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+  </script>
+</body>
+</html>
